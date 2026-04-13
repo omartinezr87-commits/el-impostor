@@ -129,7 +129,7 @@
       position: absolute; bottom: 0; left: 0; right: 0;
       padding: 1.4rem 1.5rem; text-align: center;
       background: var(--bg); border-top: 1px solid var(--border);
-      font-size: 0.9rem; color: var(--muted); z-index: 5; cursor: pointer;
+      font-size: 0.9rem; color: var(--muted); z-index: 20; cursor: pointer;
     }
     .pass-msg strong { color: var(--text); }
     .pass-msg .cta { color: var(--accent); font-size: 0.8rem; display: block; margin-top: 0.3rem; }
@@ -248,22 +248,28 @@
 </div>
 
 <!-- REVEAL -->
-<div id="screen-reveal" class="screen">
-  <div class="reveal-content">
-    <p class="role-label" id="reveal-role-label">Tu palabra</p>
-    <div class="role-word" id="reveal-word"></div>
-    <p class="role-hint" id="reveal-hint"></p>
-  </div>
-  <div class="reveal-cover" id="reveal-cover">
-    <div class="player-badge">
-      <div class="turn-label">Le toca a</div>
-      <div class="player-name" id="cover-name"></div>
+<div id="screen-reveal" class="screen" style="padding:0;display:flex;flex-direction:column;min-height:100dvh;">
+  <!-- Zona deslizable: ocupa todo el espacio menos el botón -->
+  <div style="position:relative;flex:1;overflow:hidden;">
+    <!-- Fondo con la palabra (siempre detrás) -->
+    <div class="reveal-content">
+      <p class="role-label" id="reveal-role-label">Tu palabra</p>
+      <div class="role-word" id="reveal-word"></div>
+      <p class="role-hint" id="reveal-hint"></p>
     </div>
-    <span class="swipe-arrow">↑</span>
-    <p class="swipe-hint">Desliza hacia arriba para ver tu rol</p>
-    <p class="swipe-hint" style="margin-top:0.3rem;font-size:0.75rem;color:#555">Suelta para tapar</p>
+    <!-- Capa que tapa, se desliza hacia arriba -->
+    <div class="reveal-cover" id="reveal-cover">
+      <div class="player-badge">
+        <div class="turn-label">Le toca a</div>
+        <div class="player-name" id="cover-name"></div>
+      </div>
+      <span class="swipe-arrow">↑</span>
+      <p class="swipe-hint">Desliza hacia arriba para ver tu rol</p>
+      <p class="swipe-hint" style="margin-top:0.3rem;font-size:0.75rem;color:#555">Suelta para tapar</p>
+    </div>
   </div>
-  <div class="pass-msg" id="pass-msg"></div>
+  <!-- Botón fijo abajo, completamente fuera de la zona deslizable -->
+  <div id="pass-msg" style="flex-shrink:0;padding:1.4rem 1.5rem;text-align:center;background:var(--bg);border-top:1px solid var(--border);font-size:0.9rem;color:var(--muted);cursor:pointer;"></div>
 </div>
 
 <!-- VOTE -->
