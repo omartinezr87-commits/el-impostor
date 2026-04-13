@@ -73,8 +73,7 @@
     .divider { border: none; border-top: 1px solid var(--border); margin: 1.2rem 0; }
 
     /* REVEAL */
-    #screen-reveal { padding: 0; position: relative; min-height: 100dvh; display: flex; flex-direction: column; }
-    .reveal-zone { position: relative; flex: 1; overflow: hidden; min-height: 200px; }
+    #screen-reveal { padding: 0; position: relative; min-height: 100dvh; }
     .reveal-content {
       position: absolute; inset: 0;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -741,23 +740,21 @@ function setupReveal() {
     wordEl.className='role-word';
     hintEl.textContent='';
   }
+  resetCover();
+  goTo('screen-reveal');
 
+  // Tras ver el rol, al soltar el dedo aparece la pantalla siguiente
   const isLast=currentRevealIdx===activePlayers.length-1;
-  const msgEl=document.getElementById('pass-msg-text');
-  const ctaEl=document.getElementById('pass-cta');
-  const btn=document.getElementById('pass-btn');
-
   if(isLast) {
-    msgEl.innerHTML='Todos han visto su rol.';
-    ctaEl.textContent='Toca aquí para empezar el debate →';
-    btn.onclick=()=>{ soundPass(); setupDebate(); };
+    revealOnRelease=()=>goTo('screen-ready');
   } else {
     const next=activePlayers[currentRevealIdx+1];
-    msgEl.innerHTML=`Pasa el móvil a <strong>${next}</strong>`;
-    ctaEl.textContent='Toca aquí cuando esté listo →';
-    btn.onclick=()=>{ soundPass(); currentRevealIdx++; resetCover(); setupReveal(); };
+    document.getElementById('pass-next-name').textContent=next;
+    document.getElementById('btn-pass-next').onclick=()=>{
+      soundPass(); currentRevealIdx++; setupReveal();
+    };
+    revealOnRelease=()=>{ soundPass(); goTo('screen-pass'); };
   }
-  resetCover();
 }
 
 function resetCover() {
@@ -767,33 +764,38 @@ function resetCover() {
 }
 
 // ── SWIPE ─────────────────────────────────────────────────────────
+let revealOnRelease=null;
 (function(){
   const cover=document.getElementById('reveal-cover');
-  let startY=0,dragging=false,played=false;
-  function onStart(y){startY=y;dragging=true;played=false;cover.style.transition='none';}
+  let startY=0,dragging=false,played=false,revealed=false;
+  const THRESHOLD=80;
+  function onStart(y){startY=y;dragging=true;played=false;revealed=false;cover.style.transition='none';}
   function onMove(y){
     if(!dragging)return;
     const dy=startY-y;
     if(dy>0){
       cover.style.transform=`translateY(${-dy}px)`;
       if(dy>60&&!played){played=true;soundReveal();}
+      if(dy>THRESHOLD) revealed=true;
     }
   }
   function onEnd(){
     if(!dragging)return; dragging=false;
     cover.style.transition='transform 0.3s ease';
     cover.style.transform='translateY(0)';
+    if(revealed&&revealOnRelease){
+      setTimeout(()=>{ if(revealOnRelease){revealOnRelease();revealOnRelease=null;} },320);
+    }
+    revealed=false;
   }
   cover.addEventListener('touchstart',e=>onStart(e.touches[0].clientY),{passive:true});
   cover.addEventListener('touchmove',e=>{onMove(e.touches[0].clientY);e.preventDefault();},{passive:false});
   cover.addEventListener('touchend',onEnd);
   cover.addEventListener('mousedown',e=>{e.preventDefault();onStart(e.clientY);});
-  window.addEventListener('mousemove',e=>onMove(e.clientY));
+  window.addEventListener('mousemove',e=>{if(dragging)onMove(e.clientY);});
   window.addEventListener('mouseup',onEnd);
 
-  // Sonido impostor al revelar
-  const origSetup=window.setupReveal;
-  document.getElementById('reveal-cover').addEventListener('touchstart',()=>{
+  cover.addEventListener('touchstart',()=>{
     const isImpostor=activePlayers[currentRevealIdx]===impostorName;
     if(isImpostor) setTimeout(soundImpostor,400);
   },{passive:true});
