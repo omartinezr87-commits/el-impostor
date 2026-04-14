@@ -28,10 +28,30 @@
     .screen { display: none; flex-direction: column; min-height: 100dvh; padding: 1.5rem; padding-bottom: 2rem; }
     .screen.active { display: flex; }
 
-    /* Pantalla reveal: sin padding, ocupa todo */
-    #screen-reveal { display: none; position: relative; width: 100%; height: 100dvh; min-height: 100dvh; padding: 0; overflow: hidden; }
-    #screen-reveal.active { display: block; }
-
+    /* FONDO CAMPO FÚTBOL */
+    .football-bg #field-background { display: block; }
+    #field-background {
+      display: none;
+      position: fixed; inset: 0; z-index: 0;
+      pointer-events: none;
+      width: 100%; height: 100%;
+    }
+    #field-background svg { width: 100%; height: 100%; }
+    .football-bg .screen { position: relative; z-index: 1; }
+    .football-bg #screen-reveal { z-index: 1; }
+    #screen-reveal { display: none; position: relative; width: 100%; height: 100dvh; min-height: 100dvh; padding: 0; overflow: hidden; flex-direction: column; }
+    #screen-reveal.active { display: flex; }
+    .reveal-zone { position: relative; flex: 1; overflow: hidden; min-height: 0; }
+    .reveal-content {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 2rem; text-align: center; background: var(--surface);
+    }
+    .reveal-cover {
+      position: absolute; inset: 0; background: var(--bg);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 10; touch-action: none; cursor: grab;
+    }
     h1 { font-family: var(--font); font-size: 2.8rem; color: var(--accent); letter-spacing: -1px; line-height: 1.1; }
     h2 { font-family: var(--font); font-size: 1.4rem; color: var(--text); margin-bottom: 0.5rem; }
     .subtitle { color: var(--muted); font-size: 0.85rem; margin-bottom: 1.2rem; }
@@ -190,6 +210,61 @@
 </head>
 <body>
 
+<!-- FONDO CAMPO FÚTBOL (visible solo en modo fútbol) -->
+<div id="field-background">
+<svg viewBox="0 0 420 780" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <!-- Césped franjas verticales alternadas -->
+  <rect width="420" height="780" fill="#2d6a2d"/>
+  <rect x="0"   width="52" height="780" fill="#2a632a"/>
+  <rect x="104" width="52" height="780" fill="#2a632a"/>
+  <rect x="208" width="52" height="780" fill="#2a632a"/>
+  <rect x="312" width="52" height="780" fill="#2a632a"/>
+  <!-- Borde exterior -->
+  <rect x="24" y="24" width="372" height="732" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2"/>
+  <!-- Línea central -->
+  <line x1="24" y1="390" x2="396" y2="390" stroke="rgba(255,255,255,0.55)" stroke-width="2"/>
+  <!-- Círculo central -->
+  <circle cx="210" cy="390" r="58" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2"/>
+  <circle cx="210" cy="390" r="4" fill="rgba(255,255,255,0.6)"/>
+  <!-- ÁREA GRANDE arriba -->
+  <rect x="106" y="24" width="208" height="112" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2"/>
+  <!-- ÁREA PEQUEÑA arriba -->
+  <rect x="148" y="24" width="124" height="50" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2"/>
+  <!-- PUNTO PENAL arriba -->
+  <circle cx="210" cy="100" r="3.5" fill="rgba(255,255,255,0.55)"/>
+  <!-- ARCO PENAL arriba -->
+  <path d="M152,136 A58,58 0 0,0 268,136" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+  <!-- PORTERÍA arriba -->
+  <rect x="172" y="8" width="76" height="16" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2.5"/>
+  <line x1="180" y1="8" x2="180" y2="24" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+  <line x1="190" y1="8" x2="190" y2="24" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+  <line x1="200" y1="8" x2="200" y2="24" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+  <line x1="210" y1="8" x2="210" y2="24" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+  <line x1="220" y1="8" x2="220" y2="24" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+  <line x1="230" y1="8" x2="230" y2="24" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+  <line x1="240" y1="8" x2="240" y2="24" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+  <!-- ÁREA GRANDE abajo -->
+  <rect x="106" y="644" width="208" height="112" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2"/>
+  <!-- ÁREA PEQUEÑA abajo -->
+  <rect x="148" y="706" width="124" height="50" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2"/>
+  <!-- PUNTO PENAL abajo -->
+  <circle cx="210" cy="680" r="3.5" fill="rgba(255,255,255,0.55)"/>
+  <!-- ARCO PENAL abajo -->
+  <path d="M152,644 A58,58 0 0,1 268,644" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+  <!-- PORTERÍA abajo -->
+  <rect x="172" y="756" width="76" height="16" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2.5"/>
+  <line x1="180" y1="756" x2="180" y2="772" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+  <line x1="190" y1="756" x2="190" y2="772" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+  <line x1="200" y1="756" x2="200" y2="772" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+  <line x1="210" y1="756" x2="210" y2="772" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+  <line x1="220" y1="756" x2="220" y2="772" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+  <line x1="230" y1="756" x2="230" y2="772" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+  <line x1="240" y1="756" x2="240" y2="772" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+  <!-- Overlay oscuro para legibilidad -->
+  <rect width="420" height="780" fill="rgba(0,0,0,0.42)"/>
+</svg>
+</div>
+
 <!-- HOME -->
 <div id="screen-home" class="screen active">
   <h1>El<br>Impostor</h1>
@@ -250,7 +325,7 @@
   </div>
   <div class="gap"></div>
   <button class="btn" id="btn-to-players" disabled>Siguiente →</button>
-  <button class="btn secondary" onclick="goTo('screen-home')">Cancelar</button>
+  <button class="btn secondary" onclick="goHome()">Cancelar</button>
 </div>
 
 <!-- PLAYERS -->
@@ -286,52 +361,44 @@
   <button class="btn secondary" onclick="goTo('screen-players')">← Atrás</button>
 </div>
 
-<!-- REVEAL: pantalla completa, solo deslizamiento -->
+<!-- REVEAL: zona deslizable arriba + botón fijo abajo -->
 <div id="screen-reveal">
-  <div class="reveal-content">
-    <p class="role-label" id="reveal-role-label">Tu palabra</p>
-    <div class="role-word" id="reveal-word"></div>
-    <p class="role-hint" id="reveal-hint"></p>
-  </div>
-  <div class="reveal-cover" id="reveal-cover">
-    <div class="player-badge">
-      <div class="turn-label">Le toca a</div>
-      <div class="player-name" id="cover-name"></div>
+  <div class="reveal-zone">
+    <div class="reveal-content">
+      <p class="role-label" id="reveal-role-label">Tu palabra</p>
+      <div class="role-word" id="reveal-word"></div>
+      <p class="role-hint" id="reveal-hint"></p>
     </div>
-    <span class="swipe-arrow">↑</span>
-    <p class="swipe-hint">Desliza hacia arriba para ver tu rol</p>
-    <p class="swipe-hint" style="margin-top:0.3rem;font-size:0.75rem;color:#555">Suelta para pasar</p>
+    <div class="reveal-cover" id="reveal-cover">
+      <div class="player-badge">
+        <div class="turn-label">Le toca a</div>
+        <div class="player-name" id="cover-name"></div>
+      </div>
+      <span class="swipe-arrow">↑</span>
+      <p class="swipe-hint">Desliza para ver tu rol</p>
+      <p class="swipe-hint" style="margin-top:0.3rem;font-size:0.75rem;color:#555">Suelta para tapar</p>
+    </div>
   </div>
+  <button class="btn" id="btn-reveal-next" style="flex-shrink:0;border-radius:0;padding:1.1rem 1.5rem;font-size:1rem"></button>
 </div>
 
-<!-- PASS: pasa el móvil al siguiente -->
-<div id="screen-pass" class="screen" style="align-items:center;justify-content:center;text-align:center;gap:1.2rem">
-  <div class="player-badge" style="padding:1.5rem 3rem">
-    <div class="turn-label">Ahora le toca a</div>
-    <div class="player-name" id="pass-next-name" style="font-size:2.2rem"></div>
-  </div>
-  <p style="color:var(--muted);font-size:0.9rem">Pásale el móvil cuando estés listo</p>
-  <div class="gap"></div>
-  <button class="btn" id="btn-pass-next">Ver mi rol →</button>
-</div>
-
-<!-- READY: todos han visto su rol -->
-<div id="screen-ready" class="screen" style="align-items:center;justify-content:center;text-align:center;gap:1.2rem">
-  <div style="font-size:3.5rem">🎭</div>
-  <h2 style="font-size:1.8rem">¡Todos listos!</h2>
-  <p style="color:var(--muted);font-size:0.9rem;max-width:260px;line-height:1.6">Cada jugador ya conoce su rol. Ahora debatid y encontrad al impostor.</p>
+<!-- READY: todos han visto su rol + orden de turno -->
+<div id="screen-ready" class="screen" style="gap:0.8rem">
+  <div style="font-size:2.5rem;text-align:center">🎭</div>
+  <h2 style="text-align:center">¡Todos listos!</h2>
+  <p style="color:var(--muted);font-size:0.85rem;text-align:center;line-height:1.5">Este es el orden en que habla cada jugador esta ronda:</p>
+  <div id="turn-order-list" style="display:flex;flex-direction:column;gap:0.5rem;margin-top:0.3rem"></div>
   <div class="gap"></div>
   <button class="btn" onclick="setupDebate()">Empezar debate →</button>
 </div>
 
 <!-- DEBATE -->
-<div id="screen-debate" class="screen" style="gap:0.8rem;align-items:center;justify-content:center;text-align:center">
-  <div class="debate-box" style="width:100%">
-    <div class="debate-round" id="debate-round"></div>
-    <h2 style="margin-bottom:0.3rem">¡Empieza el debate!</h2>
-    <p style="font-size:0.85rem;color:var(--muted);line-height:1.6">Cada jugador dice algo relacionado con su palabra sin revelarla. Luego votad.</p>
-    <div class="debate-players" id="debate-players"></div>
-  </div>
+<div id="screen-debate" class="screen" style="gap:0.8rem">
+  <div class="debate-round" id="debate-round" style="text-align:center"></div>
+  <h2 style="text-align:center;margin-bottom:0">¡Empieza el debate!</h2>
+  <p style="font-size:0.85rem;color:var(--muted);line-height:1.6;text-align:center">Cada jugador dice algo relacionado con su palabra sin revelarla. Luego votad.</p>
+  <p style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:0.5rem">Orden de turno</p>
+  <div id="debate-turn-order" style="display:flex;flex-direction:column;gap:0.5rem"></div>
   <div class="gap"></div>
   <button class="btn" id="btn-go-vote">Votar →</button>
 </div>
@@ -362,7 +429,8 @@
   <p style="color:var(--muted);font-size:0.95rem;line-height:1.6;margin-bottom:0.4rem" id="iw-sub"></p>
   <p style="color:var(--muted);font-size:0.9rem">La palabra era: <strong style="color:var(--accent)" id="impostor-wins-word"></strong></p>
   <div class="gap"></div>
-  <button class="btn" onclick="goTo('screen-home')">Nueva partida</button>
+  <button class="btn" onclick="repeatGame()" style="background:var(--accent-football);color:#fff">Repetir partida →</button>
+  <button class="btn secondary" onclick="goHome()" style="margin-top:0.5rem">Nueva partida</button>
   <button class="btn secondary" onclick="playAgainSamePlayers()" style="margin-top:0.5rem">Mismos jugadores</button>
 </div>
 
@@ -383,7 +451,8 @@
     <hr class="divider">
     <p style="font-size:0.9rem;color:var(--muted);margin-bottom:0.5rem">La palabra era: <strong style="color:var(--accent)" id="reveal-final-word"></strong></p>
     <p style="font-size:0.9rem;color:var(--muted);margin-bottom:1.2rem">El impostor era: <strong style="color:var(--accent2)" id="reveal-impostor"></strong></p>
-    <button class="btn" onclick="goTo('screen-home')">Nueva partida</button>
+    <button class="btn" onclick="repeatGame()" style="background:var(--accent-football);color:#fff">Repetir partida →</button>
+    <button class="btn secondary" onclick="goHome()" style="margin-top:0.5rem">Nueva partida</button>
     <button class="btn secondary" onclick="playAgainSamePlayers()" style="margin-top:0.5rem">Mismos jugadores</button>
   </div>
 </div>
@@ -407,6 +476,16 @@ const CATEGORIES = {
     {w:'Desierto',h1:'Arena',h2:'Zona árida'},{w:'Tornado',h1:'Viento',h2:'Tromba de aire'},
     {w:'Faro',h1:'Costa',h2:'Torre luminosa'},{w:'Momia',h1:'Egipto',h2:'Cadáver preservado'},
     {w:'Iglú',h1:'Hielo',h2:'Vivienda ártica'},{w:'Mariposa',h1:'Vuelo',h2:'Insecto con alas'},
+    {w:'Pirata',h1:'Mar',h2:'Ladrón marino'},{w:'Robot',h1:'Metal',h2:'Máquina humanoide'},
+    {w:'Espía',h1:'Secreto',h2:'Agente encubierto'},{w:'Fantasma',h1:'Espíritu',h2:'Aparición sobrenatural'},
+    {w:'Elefante',h1:'Trompa',h2:'Mamífero gigante'},{w:'Helado',h1:'Frío',h2:'Postre congelado'},
+    {w:'Fútbol',h1:'Balón',h2:'Deporte rey'},{w:'Concierto',h1:'Directo',h2:'Actuación en vivo'},
+    {w:'Aeropuerto',h1:'Vuelos',h2:'Terminal aérea'},{w:'Cementerio',h1:'Tumbas',h2:'Lugar de enterramiento'},
+    {w:'Cocodrilo',h1:'Río',h2:'Reptil peligroso'},{w:'Hamburguesa',h1:'Carne',h2:'Pan con ternera'},
+    {w:'Pingüino',h1:'Frío',h2:'Ave antártica'},{w:'Catedral',h1:'Torres',h2:'Templo cristiano'},
+    {w:'Surfista',h1:'Olas',h2:'Deportista acuático'},{w:'Brujo',h1:'Magia',h2:'Hechicero malvado'},
+    {w:'Astronauta',h1:'Espacio',h2:'Viajero espacial'},{w:'Terremoto',h1:'Suelo',h2:'Movimiento sísmico'},
+    {w:'Submarinista',h1:'Buceo',h2:'Explorador marino'},{w:'Lobo',h1:'Manada',h2:'Cánido salvaje'},
   ],
   'Comida': [
     {w:'Pizza',h1:'Italiana',h2:'Masa con tomate'},{w:'Sushi',h1:'Japonés',h2:'Arroz con pescado'},
@@ -416,7 +495,14 @@ const CATEGORIES = {
     {w:'Ramen',h1:'Fideos',h2:'Sopa japonesa'},{w:'Pulpo',h1:'Mar',h2:'Cefalópodo comestible'},
     {w:'Gazpacho',h1:'Frío',h2:'Sopa andaluza'},{w:'Salmón',h1:'Pescado',h2:'Pez rosado'},
     {w:'Tortilla',h1:'Huevos',h2:'Plato español'},{w:'Queso',h1:'Lácteo',h2:'Derivado leche'},
-    {w:'Trufa',h1:'Hongo',h2:'Seta lujosa'},
+    {w:'Trufa',h1:'Hongo',h2:'Seta lujosa'},{w:'Curry',h1:'Indio',h2:'Especia picante'},
+    {w:'Fondue',h1:'Queso',h2:'Plato suizo fundido'},{w:'Ceviche',h1:'Peruano',h2:'Pescado con limón'},
+    {w:'Tiramisú',h1:'Italiano',h2:'Postre con café'},{w:'Hummus',h1:'Árabe',h2:'Pasta de garbanzos'},
+    {w:'Crepe',h1:'Francés',h2:'Masa fina rellena'},{w:'Dim Sum',h1:'Chino',h2:'Bocados al vapor'},
+    {w:'Jamón',h1:'España',h2:'Embutido curado'},{w:'Langosta',h1:'Marisco',h2:'Crustáceo lujoso'},
+    {w:'Macarrón',h1:'Pasta',h2:'Tubo de harina'},{w:'Nachos',h1:'México',h2:'Chips con queso'},
+    {w:'Ostras',h1:'Mar',h2:'Molusco con concha'},{w:'Risotto',h1:'Arroz',h2:'Plato italiano cremoso'},
+    {w:'Steak',h1:'Carne',h2:'Filete a la plancha'},{w:'Wasabi',h1:'Picante',h2:'Pasta verde japonesa'},
   ],
   'Animales': [
     {w:'Tiburón',h1:'Mar',h2:'Depredador marino'},{w:'León',h1:'Selva',h2:'Felino africano'},
@@ -426,7 +512,14 @@ const CATEGORIES = {
     {w:'Lobo',h1:'Manada',h2:'Cánido salvaje'},{w:'Águila',h1:'Vuelo',h2:'Ave rapaz'},
     {w:'Hipopótamo',h1:'Río',h2:'Mamífero acuático'},{w:'Murciélago',h1:'Noche',h2:'Mamífero volador'},
     {w:'Canguro',h1:'Australia',h2:'Marsupial saltador'},{w:'Panda',h1:'Bambú',h2:'Oso chino'},
-    {w:'Delfín',h1:'Mar',h2:'Cetáceo inteligente'},
+    {w:'Delfín',h1:'Mar',h2:'Cetáceo inteligente'},{w:'Gorila',h1:'Selva',h2:'Primate grande'},
+    {w:'Cobra',h1:'Veneno',h2:'Serpiente peligrosa'},{w:'Flamenco',h1:'Rosa',h2:'Ave de patas largas'},
+    {w:'Tortuga',h1:'Caparazón',h2:'Reptil lento'},{w:'Oso polar',h1:'Ártico',h2:'Carnívoro blanco'},
+    {w:'Camello',h1:'Desierto',h2:'Animal con joroba'},{w:'Rinoceronte',h1:'Cuerno',h2:'Mamífero blindado'},
+    {w:'Medusa',h1:'Mar',h2:'Animal gelatinoso'},{w:'Cebra',h1:'Rayas',h2:'Équido africano'},
+    {w:'Pavo real',h1:'Plumas',h2:'Ave colorida'},{w:'Escorpión',h1:'Veneno',h2:'Arácnido con pinzas'},
+    {w:'Nutria',h1:'Río',h2:'Mamífero acuático juguetón'},{w:'Leopardo',h1:'Manchas',h2:'Felino veloz'},
+    {w:'Ballena',h1:'Océano',h2:'Mayor mamífero'},{w:'Cacatúa',h1:'Pico',h2:'Ave habladora'},
   ],
   'Cine y TV': [
     {w:'Zombie',h1:'Muerto',h2:'No muerto hambriento'},{w:'Superhéroe',h1:'Poderes',h2:'Justicieros ficticios'},
@@ -436,7 +529,14 @@ const CATEGORIES = {
     {w:'Secuela',h1:'Segunda',h2:'Continuación película'},{w:'Robot',h1:'Metal',h2:'Máquina humanoide'},
     {w:'Monstruo',h1:'Terror',h2:'Criatura aterradora'},{w:'Espía',h1:'Secreto',h2:'Agente encubierto'},
     {w:'Fantasma',h1:'Espíritu',h2:'Aparición sobrenatural'},{w:'Pirata',h1:'Mar',h2:'Ladrón marino'},
-    {w:'Alienígena',h1:'Espacio',h2:'Ser extraterrestre'},
+    {w:'Alienígena',h1:'Espacio',h2:'Ser extraterrestre'},{w:'Detective',h1:'Crimen',h2:'Investigador privado'},
+    {w:'Vampiro',h1:'Sangre',h2:'No muerto nocturno'},{w:'Ninja',h1:'Japón',h2:'Guerrero sigiloso'},
+    {w:'Holograma',h1:'Luz',h2:'Imagen tridimensional'},{w:'Gladiador',h1:'Arena',h2:'Luchador romano'},
+    {w:'Hacker',h1:'Ordenador',h2:'Intruso informático'},{w:'Bruja',h1:'Escoba',h2:'Hechicera de cuentos'},
+    {w:'Dinosaurio',h1:'Extinción',h2:'Reptil prehistórico'},{w:'Momia',h1:'Egipto',h2:'Muerto vendado'},
+    {w:'Androide',h1:'Robot',h2:'Humanoide artificial'},{w:'Caballero',h1:'Espada',h2:'Guerrero medieval'},
+    {w:'Samurái',h1:'Japón',h2:'Guerrero con katana'},{w:'Zombi',h1:'Apocalipsis',h2:'Muerto viviente'},
+    {w:'Serial killer',h1:'Crimen',h2:'Asesino en serie'},{w:'Doble agente',h1:'Traición',h2:'Espía infiltrado'},
   ],
   'Música': [
     {w:'Guitarra',h1:'Cuerdas',h2:'Instrumento punteo'},{w:'Batería',h1:'Golpes',h2:'Instrumento percusión'},
@@ -446,7 +546,14 @@ const CATEGORIES = {
     {w:'Coro',h1:'Voces',h2:'Grupo vocal'},{w:'Piano',h1:'Teclas',h2:'Instrumento clásico'},
     {w:'Rap',h1:'Rima',h2:'Música hablada'},{w:'Amplificador',h1:'Volumen',h2:'Potencia sonido'},
     {w:'Festival',h1:'Verano',h2:'Evento musical masivo'},{w:'Violín',h1:'Arco',h2:'Instrumento cuerda clásico'},
-    {w:'Estudio',h1:'Grabación',h2:'Sala de grabación'},
+    {w:'Estudio',h1:'Grabación',h2:'Sala de grabación'},{w:'Saxofón',h1:'Viento',h2:'Instrumento jazz'},
+    {w:'Trompeta',h1:'Metal',h2:'Instrumento de viento'},{w:'Flauta',h1:'Soplar',h2:'Tubo musical'},
+    {w:'Acordeón',h1:'Fuelle',h2:'Instrumento popular'},{w:'Arpa',h1:'Cuerdas',h2:'Instrumento orquestal'},
+    {w:'Sintetizador',h1:'Electrónico',h2:'Teclado digital'},{w:'Ukelele',h1:'Hawaii',h2:'Guitarra pequeña'},
+    {w:'Maracas',h1:'Ritmo',h2:'Instrumento percusión'},{ w:'Orquesta',h1:'Clásica',h2:'Conjunto musical grande'},
+    {w:'Solista',h1:'Solo',h2:'Músico individual'},{w:'Remix',h1:'Mezcla',h2:'Versión modificada'},
+    {w:'Acústico',h1:'Natural',h2:'Sin amplificación'},{w:'Playlist',h1:'Lista',h2:'Selección de canciones'},
+    {w:'Gira',h1:'Tour',h2:'Serie de conciertos'},{w:'Backstage',h1:'Bambalinas',h2:'Zona tras escenario'},
   ],
   'Deporte': [
     {w:'Fútbol',h1:'Balón',h2:'Deporte rey'},{w:'Tenis',h1:'Raqueta',h2:'Deporte individual'},
@@ -456,7 +563,14 @@ const CATEGORIES = {
     {w:'Ski',h1:'Nieve',h2:'Deporte deslizamiento'},{w:'Atletismo',h1:'Pista',h2:'Deporte carrera'},
     {w:'Surf',h1:'Olas',h2:'Deporte acuático deslizante'},{w:'Escalada',h1:'Roca',h2:'Deporte vertical'},
     {w:'Esgrima',h1:'Espada',h2:'Deporte combate espadas'},{w:'Judo',h1:'Tatami',h2:'Arte marcial japonés'},
-    {w:'Voleibol',h1:'Red',h2:'Deporte equipo red'},
+    {w:'Voleibol',h1:'Red',h2:'Deporte equipo red'},{w:'Béisbol',h1:'Bate',h2:'Deporte americano'},
+    {w:'Hockey',h1:'Palo',h2:'Deporte hielo o hierba'},{w:'Kárate',h1:'Golpes',h2:'Arte marcial'},
+    {w:'Remo',h1:'Agua',h2:'Deporte barca'},{w:'Halterofilia',h1:'Pesas',h2:'Levantamiento peso'},
+    {w:'Triatlón',h1:'Tres',h2:'Natación ciclismo carrera'},{w:'Padel',h1:'Raqueta',h2:'Tenis en recinto'},
+    {w:'Lucha libre',h1:'Ring',h2:'Combate sin reglas'},{w:'Motociclismo',h1:'Moto',h2:'Deporte velocidad'},
+    {w:'Patinaje',h1:'Hielo',h2:'Deslizamiento sobre hielo'},{w:'Tiro con arco',h1:'Flecha',h2:'Deporte precisión'},
+    {w:'Pelota vasca',h1:'Frontón',h2:'Deporte tradicional'},{w:'Waterpolo',h1:'Piscina',h2:'Fútbol acuático'},
+    {w:'Balonmano',h1:'Portería',h2:'Deporte de mano'},{w:'Squash',h1:'Raqueta',h2:'Deporte en sala cerrada'},
   ],
   'Lugares': [
     {w:'Playa',h1:'Arena',h2:'Costa arenosa'},{w:'Volcán',h1:'Lava',h2:'Montaña ígnea'},
@@ -466,7 +580,14 @@ const CATEGORIES = {
     {w:'Mercado',h1:'Puestos',h2:'Lugar de comercio'},{w:'Catedral',h1:'Torres',h2:'Templo cristiano'},
     {w:'Aeropuerto',h1:'Vuelos',h2:'Terminal aérea'},{w:'Selva',h1:'Árboles',h2:'Bosque tropical'},
     {w:'Cueva',h1:'Oscuridad',h2:'Cavidad rocosa'},{w:'Fábrica',h1:'Máquinas',h2:'Planta industrial'},
-    {w:'Estadio',h1:'Gradas',h2:'Recinto deportivo'},
+    {w:'Estadio',h1:'Gradas',h2:'Recinto deportivo'},{w:'Submarino',h1:'Profundidad',h2:'Nave submarina'},
+    {w:'Fosa marina',h1:'Profundidad',h2:'Abismo oceánico'},{w:'Rascacielos',h1:'Alto',h2:'Edificio enorme'},
+    {w:'Laberinto',h1:'Pérdida',h2:'Caminos sin salida'},{w:'Pirámide',h1:'Egipto',h2:'Tumba faraónica'},
+    {w:'Oasis',h1:'Agua',h2:'Refugio en desierto'},{w:'Acantilado',h1:'Caída',h2:'Roca sobre el mar'},
+    {w:'Bunker',h1:'Guerra',h2:'Refugio subterráneo'},{w:'Finca',h1:'Campo',h2:'Propiedad rural'},
+    {w:'Mezquita',h1:'Islam',h2:'Templo musulmán'},{w:'Palacio',h1:'Rey',h2:'Residencia real'},
+    {w:'Puerto',h1:'Barcos',h2:'Terminal marítima'},{w:'Mina',h1:'Subterráneo',h2:'Extracción mineral'},
+    {w:'Glacier',h1:'Hielo',h2:'Masa de hielo enorme'},{w:'Pantano',h1:'Barro',h2:'Zona inundada'},
   ],
 };
 
@@ -541,6 +662,8 @@ let gameWord='', gameHint='', impostorName='';
 let currentRevealIdx=0, voteSelected=null, round=1;
 let difficulty='none', selectedCategory='Todo';
 let scores={};
+let turnOrder=[];
+let usedWords={}; // clave: 'categoria' o 'football', valor: Set de palabras usadas
 
 // ── NAVEGACIÓN ────────────────────────────────────────────────────
 function goTo(id) {
@@ -579,7 +702,7 @@ function renderScores() {
 function buildCategorySelect() {
   document.getElementById('category-select').innerHTML =
     Object.keys(CATEGORIES).map(c =>
-      `<option value="${c}">${c} (${CATEGORIES[c].length} palabras)</option>`
+      `<option value="${c}">${c}</option>`
     ).join('');
 }
 
@@ -634,14 +757,39 @@ function getHint(item) {
   return item.h2 || item.h1 || '';
 }
 
+function pickWord(pool, key) {
+  if (!usedWords[key]) usedWords[key] = new Set();
+  let available = pool.filter(item => !usedWords[key].has(item.w));
+  if (available.length === 0) {
+    usedWords[key] = new Set(); // resetear al agotar todas
+    available = pool;
+  }
+  const item = available[Math.floor(Math.random() * available.length)];
+  usedWords[key].add(item.w);
+  return item;
+}
+
+function pickFootballer() {
+  const key = 'football';
+  if (!usedWords[key]) usedWords[key] = new Set();
+  let available = PRESETS_FOOTBALL.filter(p => !usedWords[key].has(p));
+  if (available.length === 0) {
+    usedWords[key] = new Set();
+    available = PRESETS_FOOTBALL;
+  }
+  const pick = available[Math.floor(Math.random() * available.length)];
+  usedWords[key].add(pick);
+  return pick;
+}
+
 function startGame() {
   if (gameMode==='football') {
-    gameWord = PRESETS_FOOTBALL[Math.floor(Math.random()*PRESETS_FOOTBALL.length)];
+    gameWord = pickFootballer();
     gameHint = '';
   } else {
     selectedCategory = document.getElementById('category-select').value;
     const pool = CATEGORIES[selectedCategory] || CATEGORIES['Todo'];
-    const item = pool[Math.floor(Math.random()*pool.length)];
+    const item = pickWord(pool, selectedCategory);
     gameWord = item.w;
     gameHint = getHint(item);
   }
@@ -660,7 +808,10 @@ function startGameCustom() {
 function launchGame() {
   activePlayers = [...allPlayers];
   impostorName = activePlayers[Math.floor(Math.random()*activePlayers.length)];
+  turnOrder = [...activePlayers].sort(() => Math.random() - 0.5);
   currentRevealIdx = 0; round = 1; voteSelected = null;
+  // Activar fondo de campo solo al empezar la partida
+  document.body.classList.toggle('football-bg', gameMode === 'football');
   setupReveal();
 }
 
@@ -669,7 +820,6 @@ function setupReveal() {
   const player = activePlayers[currentRevealIdx];
   const isImpostor = player === impostorName;
 
-  // Preparar contenido antes de mostrar la pantalla
   document.getElementById('cover-name').textContent = player;
   const wordEl  = document.getElementById('reveal-word');
   const hintEl  = document.getElementById('reveal-hint');
@@ -689,22 +839,19 @@ function setupReveal() {
     hintEl.textContent  = '';
   }
 
-  // Preparar qué pasa al soltar tras deslizar
+  // Configurar botón fijo de siguiente
+  const btn = document.getElementById('btn-reveal-next');
   const isLast = currentRevealIdx === activePlayers.length - 1;
   if (isLast) {
-    revealOnRelease = () => goTo('screen-ready');
+    btn.textContent = '¡Listo! Ver orden de turno →';
+    btn.onclick = () => { soundPass(); renderTurnOrder(); goTo('screen-ready'); };
   } else {
     const next = activePlayers[currentRevealIdx + 1];
-    document.getElementById('pass-next-name').textContent = next;
-    document.getElementById('btn-pass-next').onclick = () => {
-      soundPass();
-      currentRevealIdx++;
-      setupReveal();
-    };
-    revealOnRelease = () => goTo('screen-pass');
+    btn.textContent = `Siguiente: ${next} →`;
+    btn.onclick = () => { soundPass(); currentRevealIdx++; setupReveal(); };
   }
 
-  // Resetear cover y mostrar pantalla
+  // Resetear cover
   const cover = document.getElementById('reveal-cover');
   cover.style.transition = 'none';
   cover.style.transform = 'translateY(0)';
@@ -712,16 +859,13 @@ function setupReveal() {
 }
 
 // ── SWIPE ─────────────────────────────────────────────────────────
-let revealOnRelease = null;
 (function() {
   const cover = document.getElementById('reveal-cover');
-  let startY=0, dragging=false, played=false, revealed=false;
-  const THRESHOLD = 80;
+  let startY=0, dragging=false, played=false;
 
   function onStart(y) {
-    startY=y; dragging=true; played=false; revealed=false;
+    startY=y; dragging=true; played=false;
     cover.style.transition = 'none';
-    // Sonido impostor al iniciar gesto (solo si es el impostor)
     if (activePlayers[currentRevealIdx] === impostorName) {
       setTimeout(soundImpostor, 350);
     }
@@ -732,7 +876,6 @@ let revealOnRelease = null;
     if (dy > 0) {
       cover.style.transform = `translateY(${-dy}px)`;
       if (dy > 60 && !played) { played=true; soundReveal(); }
-      if (dy > THRESHOLD) revealed = true;
     }
   }
   function onEnd() {
@@ -740,12 +883,6 @@ let revealOnRelease = null;
     dragging = false;
     cover.style.transition = 'transform 0.3s ease';
     cover.style.transform = 'translateY(0)';
-    if (revealed && revealOnRelease) {
-      const fn = revealOnRelease;
-      revealOnRelease = null;
-      setTimeout(fn, 320);
-    }
-    revealed = false;
   }
 
   cover.addEventListener('touchstart', e => onStart(e.touches[0].clientY), {passive:true});
@@ -757,11 +894,22 @@ let revealOnRelease = null;
 })();
 
 // ── DEBATE ────────────────────────────────────────────────────────
+function renderTurnOrderIn(elementId) {
+  const medals = ['🥇','🥈','🥉'];
+  document.getElementById(elementId).innerHTML = turnOrder.map((p,i) => {
+    const label = i < 3 ? medals[i] : `<span style="color:var(--muted);font-size:0.9rem;font-family:var(--sans)">${i+1}º</span>`;
+    return `<div style="display:flex;align-items:center;gap:0.8rem;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.7rem 1rem">
+      <span style="font-size:1.1rem;min-width:2rem;text-align:center">${label}</span>
+      <span style="font-size:1rem;color:var(--text)">${p}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderTurnOrder() { renderTurnOrderIn('turn-order-list'); }
+
 function setupDebate() {
   document.getElementById('debate-round').textContent = `Ronda ${round}`;
-  document.getElementById('debate-players').innerHTML = activePlayers.map(p =>
-    `<span class="debate-player-tag">${p}</span>`
-  ).join('');
+  renderTurnOrderIn('debate-turn-order');
   goTo('screen-debate');
 }
 
@@ -861,10 +1009,21 @@ function checkGuess() {
 }
 
 // ── REPETIR ────────────────────────────────────────────────────────
+function repeatGame() {
+  // Relanza con los mismos jugadores, modo, categoría y dificultad — nueva palabra, nuevo impostor
+  launchGame();
+}
+
 function playAgainSamePlayers() {
   document.getElementById('custom-word').value = '';
   document.getElementById('custom-hint').value = '';
+  document.body.classList.remove('football-bg');
   goTo('screen-players');
+}
+
+function goHome() {
+  document.body.classList.remove('football-bg');
+  goTo('screen-home');
 }
 
 // ── SERVICE WORKER ────────────────────────────────────────────────
