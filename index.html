@@ -355,6 +355,12 @@
 <div id="screen-reveal">
   <div class="reveal-zone">
     <div class="reveal-content">
+      <div id="footballer-photo-wrap" style="display:none;margin-bottom:0.8rem">
+        <img id="footballer-photo" src="" alt=""
+          style="width:110px;height:110px;border-radius:50%;object-fit:cover;object-position:top center;border:3px solid var(--accent-football);background:var(--card)">
+        <div id="footballer-photo-placeholder"
+          style="display:none;width:110px;height:110px;border-radius:50%;background:var(--card);border:3px solid var(--accent-football);align-items:center;justify-content:center;font-size:2.5rem;font-family:var(--font);color:var(--accent-football)"></div>
+      </div>
       <p class="role-label" id="reveal-role-label">Tu palabra</p>
       <div class="role-word" id="reveal-word"></div>
       <p class="role-hint" id="reveal-hint"></p>
@@ -675,7 +681,8 @@ let difficulty='none', selectedCategory='Todo';
 let scores={};
 let turnOrder=[];
 let usedWords={};
-let gameSource='random'; // 'random' | 'custom'
+let gameSource='random';
+let photoCache={};
 
 // ── NAVEGACIÓN ────────────────────────────────────────────────────
 function goTo(id) {
@@ -824,9 +831,129 @@ function launchGame() {
   impostorName = activePlayers[Math.floor(Math.random()*activePlayers.length)];
   turnOrder = [...activePlayers].sort(() => Math.random() - 0.5);
   currentRevealIdx = 0; round = 1; voteSelected = null;
+  photoCache = {}; // limpiar caché de fotos
   // Activar fondo de campo solo al empezar la partida
   document.body.classList.toggle('football-bg', gameMode === 'football');
   setupReveal();
+}
+
+// ── FOTOS FUTBOLISTAS (Wikipedia) ─────────────────────────────────
+// Mapeo nombre banco → título Wikipedia (solo para nombres con caracteres especiales o ambigüedades)
+const WIKI_TITLES = {
+  "Cristiano Ronaldo":  "Cristiano Ronaldo",
+  "Ronaldo Nazário":    "Ronaldo_(Brazilian_footballer)",
+  "Romário":            "Romário",
+  "Ronaldinho":         "Ronaldinho",
+  "Thierry Henry":      "Thierry_Henry",
+  "Roberto Carlos":     "Roberto_Carlos",
+  "Cafu":               "Cafu",
+  "Iniesta":            "Andrés_Iniesta",
+  "Puyol":              "Carles_Puyol",
+  "Casillas":           "Iker_Casillas",
+  "Buffon":             "Gianluigi_Buffon",
+  "Cannavaro":          "Fabio_Cannavaro",
+  "Pirlo":              "Andrea_Pirlo",
+  "Kaká":               "Kaká",
+  "Shevchenko":         "Andriy_Shevchenko",
+  "Totti":              "Francesco_Totti",
+  "Del Piero":          "Alessandro_Del_Piero",
+  "Nedvěd":             "Pavel_Nedvěd",
+  "Figo":               "Luís_Figo",
+  "Beckham":            "David_Beckham",
+  "Owen":               "Michael_Owen",
+  "Rooney":             "Wayne_Rooney",
+  "Gerrard":            "Steven_Gerrard",
+  "Lampard":            "Frank_Lampard",
+  "Drogba":             "Didier_Drogba",
+  "Eto'o":              "Samuel_Eto'o",
+  "Adriano":            "Adriano_(footballer)",
+  "Robinho":            "Robinho",
+  "Neymar":             "Neymar",
+  "Mbappé":             "Kylian_Mbappé",
+  "Haaland":            "Erling_Haaland",
+  "Salah":              "Mohamed_Salah",
+  "De Bruyne":          "Kevin_De_Bruyne",
+  "Modric":             "Luka_Modrić",
+  "Benzema":            "Karim_Benzema",
+  "Lewandowski":        "Robert_Lewandowski",
+  "Suárez":             "Luis_Suárez",
+  "Griezmann":          "Antoine_Griezmann",
+  "Ibrahimović":        "Zlatan_Ibrahimović",
+  "Van Nistelrooy":     "Ruud_van_Nistelrooy",
+  "Riquelme":           "Juan_Román_Riquelme",
+  "Tevez":              "Carlos_Tevez",
+  "Agüero":             "Sergio_Agüero",
+  "Piqué":              "Gerard_Piqué",
+  "Sergio Ramos":       "Sergio_Ramos",
+  "Kompany":            "Vincent_Kompany",
+  "Vidić":              "Nemanja_Vidić",
+  "Terry":              "John_Terry",
+  "Lahm":               "Philipp_Lahm",
+  "Schweinsteiger":     "Bastian_Schweinsteiger",
+  "Müller":             "Thomas_Müller",
+  "Klose":              "Miroslav_Klose",
+  "Ballack":            "Michael_Ballack",
+  "Seedorf":            "Clarence_Seedorf",
+  "Davids":             "Edgar_Davids",
+  "Vieira":             "Patrick_Vieira",
+  "Keane":              "Roy_Keane",
+  "Scholes":            "Paul_Scholes",
+  "Rivaldo":            "Rivaldo",
+  "Bebeto":             "Bebeto",
+  "Zamorano":           "Iván_Zamorano",
+  "Salas":              "Marcelo_Salas",
+  "Batistuta":          "Gabriel_Batistuta",
+  "Valdés":             "Víctor_Valdés",
+  "Hierro":             "Fernando_Hierro",
+  "Redondo":            "Fernando_Redondo",
+  "Maradona":           "Diego_Maradona",
+  "Pelé":               "Pelé",
+  "Messi":              "Lionel_Messi",
+  "Zidane":             "Zinedine_Zidane",
+  "Xavi":               "Xavi",
+  "Raúl":               "Raúl_(footballer)",
+  "Guti":               "Guti_(footballer)",
+};
+
+async function fetchFootballerPhoto(name) {
+  if (photoCache[name] !== undefined) return photoCache[name];
+  const title = WIKI_TITLES[name] || name.replace(/ /g, '_');
+  const url = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=pageimages&piprop=thumbnail&pithumbsize=300&format=json&origin=*`;
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    const pages = data.query.pages;
+    const page = Object.values(pages)[0];
+    const src = page?.thumbnail?.source || null;
+    photoCache[name] = src;
+    return src;
+  } catch(e) {
+    photoCache[name] = null;
+    return null;
+  }
+}
+
+function showFootballerPhoto(src, name) {
+  const wrap  = document.getElementById('footballer-photo-wrap');
+  const img   = document.getElementById('footballer-photo');
+  const ph    = document.getElementById('footballer-photo-placeholder');
+  wrap.style.display = 'flex';
+  wrap.style.justifyContent = 'center';
+  if (src) {
+    img.src = src;
+    img.style.display = 'block';
+    ph.style.display  = 'none';
+  } else {
+    img.style.display = 'none';
+    ph.style.display  = 'flex';
+    ph.textContent    = name.charAt(0).toUpperCase();
+  }
+}
+
+function hideFootballerPhoto() {
+  const wrap = document.getElementById('footballer-photo-wrap');
+  wrap.style.display = 'none';
+  document.getElementById('footballer-photo').src = '';
 }
 
 // ── REVEAL ────────────────────────────────────────────────────────
@@ -838,6 +965,9 @@ function setupReveal() {
   const wordEl  = document.getElementById('reveal-word');
   const hintEl  = document.getElementById('reveal-hint');
   const labelEl = document.getElementById('reveal-role-label');
+
+  // Ocultar foto por defecto (se muestra solo al deslizar si aplica)
+  hideFootballerPhoto();
 
   if (isImpostor) {
     labelEl.textContent = '⚠ Eres el IMPOSTOR';
@@ -851,6 +981,10 @@ function setupReveal() {
     wordEl.textContent  = gameWord;
     wordEl.className    = 'role-word';
     hintEl.textContent  = '';
+    // Pre-cargar foto si es modo fútbol
+    if (gameMode === 'football') {
+      fetchFootballerPhoto(gameWord).then(src => showFootballerPhoto(src, gameWord));
+    }
   }
 
   // Configurar botón fijo de siguiente
