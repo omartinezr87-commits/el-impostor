@@ -493,7 +493,6 @@
 
 <!-- HOME -->
 <div id="screen-home" class="screen active">
-  <button id="btn-mute" onclick="toggleMusic()" style="position:absolute;top:1.2rem;right:1.2rem;z-index:10;background:transparent;border:none;font-size:1.4rem;cursor:pointer;opacity:0.6;padding:0.3rem">🔊</button>
   <div id="home-bg">
     <div class="home-shadow s1"></div>
     <div class="home-shadow s2"></div>
@@ -916,8 +915,6 @@ function pick(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
 
 // ── AUDIO ─────────────────────────────────────────────────────────
 let audioCtx = null;
-let musicMuted = false;
-let musicNodes = null; // { osc, gain, lfo, lfoGain }
 
 function getCtx() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -946,24 +943,6 @@ function playTone(freq, type, duration, vol=0.3, startFreq=null) {
   } catch(e) {}
 }
 
-function playNoise(duration, vol=0.15) {
-  try {
-    const ctx = getCtx();
-    const buf = ctx.createBuffer(1, ctx.sampleRate * duration, ctx.sampleRate);
-    const data = buf.getChannelData(0);
-    for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1);
-    const src = ctx.createBufferSource();
-    src.buffer = buf;
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'bandpass'; filter.frequency.value = 800;
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(vol, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
-    src.connect(filter); filter.connect(g); g.connect(ctx.destination);
-    src.start(); src.stop(ctx.currentTime + duration);
-  } catch(e) {}
-}
-
 // ── Sonidos mejorados ──
 function soundReveal() {
   // Susurro ascendente — como algo que emerge
@@ -973,12 +952,7 @@ function soundReveal() {
 }
 
 function soundImpostorReveal() {
-  // Golpe grave + distorsión — dramático
-  vibrate([80, 40, 120]);
-  playTone(80, 'sawtooth', 0.5, 0.4);
-  setTimeout(() => playTone(55, 'square', 0.6, 0.25), 80);
-  setTimeout(() => playNoise(0.3, 0.12), 100);
-  setTimeout(() => playTone(40, 'sine', 0.8, 0.2), 300);
+  soundReveal(); // exactamente igual para no delatar al impostor
 }
 
 function soundSuccess() {
@@ -1017,79 +991,11 @@ function soundPass() {
   playTone(440, 'sine', 0.08, 0.15);
 }
 
-// ── Música ambiental (home + modos) ──
-function startAmbientMusic() {
-  if (musicMuted) return;
-  if (musicNodes) return; // ya sonando
-  try {
-    const ctx = getCtx();
-
-    // Bajo continuo pulsante
-    const bass = ctx.createOscillator();
-    const bassGain = ctx.createGain();
-    bass.type = 'sine';
-    bass.frequency.value = 55;
-    bassGain.gain.value = 0.06;
-    bass.connect(bassGain); bassGain.connect(ctx.destination);
-    bass.start();
-
-    // Pulso lento (LFO sobre el volumen del bajo)
-    const lfo = ctx.createOscillator();
-    const lfoGain = ctx.createGain();
-    lfo.type = 'sine';
-    lfo.frequency.value = 0.4; // 0.4 Hz — un pulso cada ~2.5s
-    lfoGain.gain.value = 0.04;
-    lfo.connect(lfoGain); lfoGain.connect(bassGain.gain);
-    lfo.start();
-
-    // Nota de tensión alta y tenue
-    const tension = ctx.createOscillator();
-    const tensionGain = ctx.createGain();
-    tension.type = 'sine';
-    tension.frequency.value = 233; // Bb3 — disonante
-    tensionGain.gain.value = 0.02;
-    tension.connect(tensionGain); tensionGain.connect(ctx.destination);
-    tension.start();
-
-    // Fade-in suave
-    bassGain.gain.setValueAtTime(0, ctx.currentTime);
-    bassGain.gain.linearRampToValueAtTime(0.06, ctx.currentTime + 2.5);
-    tensionGain.gain.setValueAtTime(0, ctx.currentTime);
-    tensionGain.gain.linearRampToValueAtTime(0.02, ctx.currentTime + 3.5);
-
-    musicNodes = { bass, bassGain, lfo, lfoGain, tension, tensionGain };
-  } catch(e) {}
-}
-
-function stopAmbientMusic() {
-  if (!musicNodes) return;
-  try {
-    const ctx = getCtx();
-    const { bassGain, tensionGain, bass, lfo, tension } = musicNodes;
-    bassGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.2);
-    tensionGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.2);
-    setTimeout(() => {
-      try { bass.stop(); lfo.stop(); tension.stop(); } catch(e) {}
-      musicNodes = null;
-    }, 1300);
-  } catch(e) { musicNodes = null; }
-}
-
-function toggleMusic() {
-  musicMuted = !musicMuted;
-  const btn = document.getElementById('btn-mute');
-  if (btn) btn.textContent = musicMuted ? '🔇' : '🔊';
-  if (musicMuted) {
-    stopAmbientMusic();
-  } else {
-    startAmbientMusic();
-  }
-  try { localStorage.setItem('impostor_muted', musicMuted ? '1' : '0'); } catch(e) {}
-}
-
-function loadMutePreference() {
-  try { musicMuted = localStorage.getItem('impostor_muted') === '1'; } catch(e) {}
-}
+// ── Música ambiental desactivada ──
+function startAmbientMusic() {}
+function stopAmbientMusic() {}
+function toggleMusic() {}
+function loadMutePreference() {}
 
 // ── ANALYTICS ────────────────────────────────────────────────────
 function gaEvent(name, params) {
@@ -1112,14 +1018,6 @@ function goTo(id) {
   document.querySelectorAll('.screen, #screen-reveal').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo(0, 0);
-  // Música ambiental solo en home y modo
-  if (id === 'screen-home' || id === 'screen-mode') {
-    startAmbientMusic();
-    const btn = document.getElementById('btn-mute');
-    if (btn) btn.textContent = musicMuted ? '🔇' : '🔊';
-  } else {
-    stopAmbientMusic();
-  }
 }
 
 // ── HISTORIAL PALABRAS PERSONALIZADAS ─────────────────────────────
@@ -1999,10 +1897,6 @@ loadMutePreference();
 buildCategorySelect();
 animateHomeLetters();
 startTaglineRotation();
-// Actualizar icono mute según preferencia guardada
-const muteBtn = document.getElementById('btn-mute');
-if (muteBtn) muteBtn.textContent = musicMuted ? '🔇' : '🔊';
-
 document.getElementById('btn-to-players').addEventListener('click', goToPlayers);
 document.getElementById('btn-go-vote').addEventListener('click', setupVote);
 document.getElementById('btn-scores').addEventListener('click', () => { renderScores(); goTo('screen-scores'); });
