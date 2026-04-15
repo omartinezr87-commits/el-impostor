@@ -1582,12 +1582,29 @@ function checkGuess() {
     }
   } else {
     soundFail();
+    gaEvent('impostor_adivina', { modo: gameMode, correcto: false });
+
+    if (remainingImpostors.length > 0) {
+      // Falla pero quedan más impostores — la partida continúa
+      document.getElementById('result-icon').textContent = '❌';
+      document.getElementById('result-title').textContent = '¡Falló!';
+      document.getElementById('result-sub').textContent = `${guesser} no adivinó. Pero aún hay más impostores entre vosotros...`;
+      applyResultStyle('screen-result', 'neutral');
+      document.getElementById('final-section').innerHTML = `
+        <hr class="divider">
+        <p style="font-size:0.9rem;color:var(--muted);margin-bottom:1.2rem">La partida continúa. Quedan <strong style="color:var(--accent2)">${remainingImpostors.length}</strong> impostor${remainingImpostors.length>1?'es':''} sin descubrir.</p>
+        <button class="btn" onclick="nextRound()" style="margin-bottom:0.5rem">Siguiente ronda →</button>
+        <button class="btn secondary" onclick="goHome()" style="margin-bottom:0.5rem">Nueva partida</button>`;
+      document.getElementById('final-section').style.display = 'block';
+      return;
+    }
+
+    // No quedan más impostores — los jugadores ganan
     document.getElementById('result-icon').textContent = '✅';
     document.getElementById('result-title').textContent = '¡Los jugadores ganan!';
     document.getElementById('result-sub').textContent = `El impostor falló. Era ${label}.`;
     activePlayers.filter(p => !impostors.includes(p)).forEach(p => addScore(p, 1));
     applyResultStyle('screen-result', 'win');
-    gaEvent('impostor_adivina', { modo: gameMode, correcto: false });
   }
 
   // Pantalla final estándar
