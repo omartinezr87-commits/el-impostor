@@ -14,6 +14,14 @@
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <title>El Impostor</title>
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-TNJVYQH37W"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-TNJVYQH37W');
+  </script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; }
     :root {
@@ -824,7 +832,10 @@ function soundSuccess() { vibrate([50,30,50]); [523,659,784,1047].forEach((f,i)=
 function soundFail()    { vibrate([200,100,200]); playTone(300,'square',0.2,0.35); setTimeout(()=>playTone(220,'square',0.3,0.35),200); }
 function soundPass()    { playTone(330,'sine',0.1,0.2); }
 
-// ── ESTADO ────────────────────────────────────────────────────────
+// ── ANALYTICS ────────────────────────────────────────────────────
+function gaEvent(name, params) {
+  try { gtag('event', name, params || {}); } catch(e) {}
+}
 let allPlayers=[], activePlayers=[], gameMode=null;
 let gameWord='', gameHint='', impostorName='';
 let impostors=[], impostorCount=1, allImpostorsOriginal=[];
@@ -1083,6 +1094,13 @@ function launchGame() {
   currentRevealIdx = 0; round = 1; voteSelected = null;
   photoCache = {};
   document.body.classList.toggle('football-bg', gameMode === 'football');
+  gaEvent('partida_iniciada', {
+    modo: gameMode,
+    jugadores: allPlayers.length,
+    impostores: impostorCount,
+    categoria: gameMode === 'classic' ? selectedCategory : 'futbol',
+    dificultad: gameMode === 'classic' ? difficulty : 'none',
+  });
   setupReveal();
 }
 
@@ -1479,6 +1497,7 @@ function confirmVote() {
       document.getElementById('result-sub').textContent = `${sub} Pero... ¿será el único?`;
     }
     applyResultStyle('screen-result', 'win');
+    gaEvent('impostor_pillado', { modo: gameMode, ronda: round });
     goTo('screen-result');
 
   } else {
@@ -1507,6 +1526,7 @@ function confirmVote() {
         activeImpostors.forEach(p => addScore(p, 5));
         soundFail();
         applyResultStyle('screen-impostor-wins', 'lose');
+        gaEvent('impostor_gana', { modo: gameMode, ronda: round });
         goTo('screen-impostor-wins');
       };
     } else {
@@ -1546,6 +1566,7 @@ function checkGuess() {
     document.getElementById('result-sub').textContent = `${guesser} adivinó ${label} y escapa.`;
     addScore(guesser, 3);
     applyResultStyle('screen-result', 'lose');
+    gaEvent('impostor_adivina', { modo: gameMode, correcto: true });
     if (remainingImpostors.length > 0) {
       document.getElementById('reveal-final-word').textContent = gameWord;
       document.getElementById('reveal-impostor').textContent = guesser;
@@ -1566,6 +1587,7 @@ function checkGuess() {
     document.getElementById('result-sub').textContent = `El impostor falló. Era ${label}.`;
     activePlayers.filter(p => !impostors.includes(p)).forEach(p => addScore(p, 1));
     applyResultStyle('screen-result', 'win');
+    gaEvent('impostor_adivina', { modo: gameMode, correcto: false });
   }
 
   // Pantalla final estándar
