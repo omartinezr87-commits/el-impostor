@@ -24,9 +24,57 @@
     }
     html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--sans); }
 
-    /* Pantallas normales */
-    .screen { display: none; flex-direction: column; min-height: 100dvh; padding: 1.5rem; padding-bottom: 2rem; }
-    .screen.active { display: flex; }
+    /* ── TRANSICIONES ENTRE PANTALLAS ── */
+    .screen {
+      display: none; flex-direction: column; min-height: 100dvh;
+      padding: 1.5rem; padding-bottom: 2rem;
+    }
+    .screen.active {
+      display: flex;
+      animation: screenIn 0.28s ease forwards;
+    }
+    @keyframes screenIn {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    /* La home tiene animación distinta — aparece sin slide */
+    #screen-home.active { animation: screenFadeIn 0.4s ease forwards; }
+    @keyframes screenFadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    /* screen-reveal no usa .screen así que tiene su propia entrada */
+    #screen-reveal.active { animation: screenIn 0.22s ease forwards; }
+
+    /* ── FONDOS DE RESULTADO ── */
+    .result-bg-win  { background: radial-gradient(ellipse at 50% 0%, rgba(76,175,125,0.13) 0%, transparent 70%) !important; }
+    .result-bg-lose { background: radial-gradient(ellipse at 50% 0%, rgba(232,123,71,0.13) 0%, transparent 70%) !important; }
+    .result-bg-neutral { background: radial-gradient(ellipse at 50% 0%, rgba(232,197,71,0.10) 0%, transparent 70%) !important; }
+
+    /* Animación de entrada para iconos de resultado */
+    .result-icon-anim {
+      animation: resultIconPop 0.45s cubic-bezier(0.175,0.885,0.32,1.275) forwards;
+    }
+    @keyframes resultIconPop {
+      from { opacity: 0; transform: scale(0.4); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    .result-text-anim {
+      animation: resultTextIn 0.35s ease 0.15s both;
+    }
+    @keyframes resultTextIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── FADE-IN FOTOS WIKIPEDIA ── */
+    #footballer-photo { opacity: 0; transition: opacity 0.4s ease; }
+    #footballer-photo.loaded { opacity: 1; }
+    #footballer-photo-placeholder { opacity: 0; animation: photoFadeIn 0.4s ease 0.1s forwards; }
+    @keyframes photoFadeIn {
+      from { opacity: 0; transform: scale(0.92); }
+      to   { opacity: 1; transform: scale(1); }
+    }
 
     /* FONDO CAMPO FÚTBOL */
     .football-bg #field-background { display: block; }
@@ -193,9 +241,92 @@
 
     .gap { flex: 1; }
     .step-indicator { font-size: 0.75rem; color: var(--muted); text-align: center; margin-bottom: 1rem; letter-spacing: 1px; }
-    #screen-home { align-items: center; justify-content: center; text-align: center; gap: 1rem; }
+    #screen-home { align-items: center; justify-content: center; text-align: center; gap: 1rem; padding: 0; overflow: hidden; position: relative; }
     .logo-sub { color: var(--muted); font-size: 0.9rem; max-width: 260px; line-height: 1.6; }
     .section-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
+
+    /* ── HISTORIAL PALABRAS PERSONALIZADAS ── */
+    .history-item {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 0.6rem 0.9rem; cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .history-item:active { border-color: var(--accent); }
+    .history-item-text { display: flex; flex-direction: column; gap: 0.15rem; }
+    .history-item-word { font-size: 0.95rem; color: var(--text); font-weight: 600; }
+    .history-item-hint { font-size: 0.78rem; color: var(--muted); }
+    .history-item-use { font-size: 0.75rem; color: var(--accent); flex-shrink: 0; margin-left: 0.8rem; }
+
+    /* ── HOME REDESIGN ── */
+    #home-bg {
+      position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;
+    }
+    .home-shadow {
+      position: absolute; border-radius: 50%;
+      background: radial-gradient(circle, rgba(232,197,71,0.07) 0%, transparent 70%);
+      animation: shadowDrift 8s ease-in-out infinite;
+    }
+    .home-shadow.s1 { width: 340px; height: 340px; top: -80px; left: -80px; animation-delay: 0s; animation-duration: 9s; }
+    .home-shadow.s2 { width: 260px; height: 260px; bottom: 40px; right: -60px; animation-delay: -3s; animation-duration: 11s;
+      background: radial-gradient(circle, rgba(232,123,71,0.06) 0%, transparent 70%); }
+    .home-shadow.s3 { width: 200px; height: 200px; bottom: 30%; left: 10%; animation-delay: -6s; animation-duration: 13s; }
+    @keyframes shadowDrift {
+      0%,100% { transform: translate(0,0) scale(1); }
+      33%      { transform: translate(18px,-22px) scale(1.07); }
+      66%      { transform: translate(-14px,16px) scale(0.95); }
+    }
+
+    .home-content {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 0; padding: 2rem 1.5rem; width: 100%;
+    }
+
+    #home-icon {
+      width: 90px; height: 90px; border-radius: 22px;
+      box-shadow: 0 0 30px rgba(232,197,71,0.18), 0 4px 24px rgba(0,0,0,0.5);
+      margin-bottom: 1.4rem;
+      animation: iconPulse 3.5s ease-in-out infinite;
+    }
+    @keyframes iconPulse {
+      0%,100% { box-shadow: 0 0 30px rgba(232,197,71,0.18), 0 4px 24px rgba(0,0,0,0.5); }
+      50%      { box-shadow: 0 0 48px rgba(232,197,71,0.32), 0 4px 24px rgba(0,0,0,0.5); }
+    }
+
+    #home-title {
+      font-family: var(--font); font-size: 3.2rem; color: var(--accent);
+      letter-spacing: -1px; line-height: 1.1; margin-bottom: 1rem;
+    }
+    .home-letter { display: inline-block; opacity: 0; animation: letterAppear 0.4s forwards; }
+    .home-letter-space { display: inline-block; width: 0.4em; }
+    @keyframes letterAppear {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .home-tagline {
+      color: var(--muted); font-size: 0.95rem; min-height: 1.4em;
+      margin-bottom: 2rem; letter-spacing: 0.3px;
+      animation: taglineFade 0.6s ease;
+    }
+    @keyframes taglineFade {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .home-buttons { display: flex; flex-direction: column; gap: 0.7rem; width: 100%; max-width: 320px; }
+    .home-btn-main {
+      font-size: 1.05rem; padding: 1rem 1.5rem;
+      box-shadow: 0 0 20px rgba(232,197,71,0.2);
+      animation: btnGlow 2.5s ease-in-out infinite;
+    }
+    @keyframes btnGlow {
+      0%,100% { box-shadow: 0 0 20px rgba(232,197,71,0.2); }
+      50%      { box-shadow: 0 0 36px rgba(232,197,71,0.38); }
+    }
+    .home-btn-row { display: flex; gap: 0.6rem; }
+    .home-btn-sec { flex: 1; font-size: 0.9rem; padding: 0.75rem 0.5rem; }
   </style>
 </head>
 <body>
@@ -257,11 +388,23 @@
 
 <!-- HOME -->
 <div id="screen-home" class="screen active">
-  <h1>El<br>Impostor</h1>
-  <p class="logo-sub">Un juego de palabras, pistas y desconfianza</p>
-  <button class="btn" onclick="goTo('screen-mode')">Nueva partida</button>
-  <button class="btn secondary" id="btn-scores" style="margin-top:-0.3rem">Puntuaciones</button>
-  <button class="btn secondary" onclick="goTo('screen-rules')" style="margin-top:-0.3rem">Reglas</button>
+  <div id="home-bg">
+    <div class="home-shadow s1"></div>
+    <div class="home-shadow s2"></div>
+    <div class="home-shadow s3"></div>
+  </div>
+  <div class="home-content">
+    <img src="icon-512.png" id="home-icon" alt="El Impostor">
+    <h1 id="home-title"><span class="home-letter">E</span><span class="home-letter">l</span><span class="home-letter-space"> </span><span class="home-letter">I</span><span class="home-letter">m</span><span class="home-letter">p</span><span class="home-letter">o</span><span class="home-letter">s</span><span class="home-letter">t</span><span class="home-letter">o</span><span class="home-letter">r</span></h1>
+    <p id="home-tagline" class="home-tagline"></p>
+    <div class="home-buttons">
+      <button class="btn home-btn-main" onclick="goTo('screen-mode')">Nueva partida</button>
+      <div class="home-btn-row">
+        <button class="btn secondary home-btn-sec" id="btn-scores">Puntuaciones</button>
+        <button class="btn secondary home-btn-sec" onclick="goTo('screen-rules')">Reglas</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- RULES -->
@@ -315,7 +458,7 @@
   </div>
   <div class="gap"></div>
   <button class="btn" id="btn-to-players" disabled>Siguiente →</button>
-  <button class="btn secondary" onclick="goHome()">Cancelar</button>
+  <button class="btn secondary" onclick="goHome()">← Inicio</button>
 </div>
 
 <!-- PLAYERS -->
@@ -336,9 +479,9 @@
   <div class="gap"></div>
   <button class="btn" id="btn-start-random" onclick="startGame()" disabled>Empezar partida</button>
   <div id="custom-word-btn-wrap">
-    <button class="btn secondary" id="btn-custom-word" onclick="goTo('screen-custom')" disabled style="margin-top:0.4rem">Configurar palabra (alguien externo)</button>
+    <button class="btn secondary" id="btn-custom-word" onclick="goToCustom()" disabled style="margin-top:0.4rem">Configurar palabra (alguien externo)</button>
   </div>
-  <button class="btn secondary" onclick="goTo('screen-mode')" style="margin-top:0.2rem">← Atrás</button>
+  <button class="btn secondary" onclick="goBackToMode()" style="margin-top:0.2rem">← Atrás</button>
 </div>
 
 <!-- CUSTOM WORD -->
@@ -350,9 +493,13 @@
   </div>
   <input type="text" id="custom-word" placeholder="Palabra secreta (ej: Pizza)" maxlength="30">
   <input type="text" id="custom-hint" placeholder="Pista para el impostor" maxlength="40" style="margin-top:0.5rem">
+  <div id="custom-history-wrap" style="display:none;margin-top:0.4rem">
+    <p class="section-label">Usadas recientemente</p>
+    <div id="custom-history-list" style="display:flex;flex-direction:column;gap:0.4rem"></div>
+  </div>
   <div class="gap"></div>
   <button class="btn" onclick="startGameCustom()">Empezar partida</button>
-  <button class="btn secondary" onclick="goTo('screen-players')">← Atrás</button>
+  <button class="btn secondary" onclick="goBackToPlayers()">← Atrás</button>
 </div>
 
 <!-- REVEAL: zona deslizable arriba + botón fijo abajo -->
@@ -697,6 +844,43 @@ function goTo(id) {
   window.scrollTo(0, 0);
 }
 
+// ── HISTORIAL PALABRAS PERSONALIZADAS ─────────────────────────────
+const CUSTOM_HISTORY_MAX = 10;
+let customHistory = []; // [{w, h}]
+
+function loadCustomHistory() {
+  try { customHistory = JSON.parse(localStorage.getItem('impostor_custom_history') || '[]'); } catch(e) { customHistory = []; }
+}
+function saveCustomHistory() {
+  try { localStorage.setItem('impostor_custom_history', JSON.stringify(customHistory)); } catch(e) {}
+}
+function addToCustomHistory(word, hint) {
+  // Quitar duplicado si ya existe
+  customHistory = customHistory.filter(e => e.w.toLowerCase() !== word.toLowerCase());
+  customHistory.unshift({ w: word, h: hint });
+  if (customHistory.length > CUSTOM_HISTORY_MAX) customHistory = customHistory.slice(0, CUSTOM_HISTORY_MAX);
+  saveCustomHistory();
+}
+function renderCustomHistory() {
+  const wrap = document.getElementById('custom-history-wrap');
+  const list = document.getElementById('custom-history-list');
+  if (!customHistory.length) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  list.innerHTML = customHistory.map((e, i) => `
+    <div class="history-item" onclick="useHistoryItem(${i})">
+      <div class="history-item-text">
+        <span class="history-item-word">${e.w}</span>
+        ${e.h ? `<span class="history-item-hint">Pista: ${e.h}</span>` : '<span class="history-item-hint" style="font-style:italic">Sin pista</span>'}
+      </div>
+      <span class="history-item-use">Usar →</span>
+    </div>`).join('');
+}
+function useHistoryItem(i) {
+  const entry = customHistory[i];
+  document.getElementById('custom-word').value = entry.w;
+  document.getElementById('custom-hint').value = entry.h || '';
+}
+
 // ── PUNTUACIONES ──────────────────────────────────────────────────
 function loadScores() {
   try { scores = JSON.parse(localStorage.getItem('impostor_scores') || '{}'); } catch(e) { scores = {}; }
@@ -742,11 +926,12 @@ function selectMode(mode) {
 
 function selectDiff(btn, val) {
   difficulty = val;
-  document.querySelectorAll('.diff-pill').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#classic-options .diff-pill').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
 }
 
 function goToPlayers() {
+  // Llamado desde "Nueva partida" — limpia jugadores y configuración
   document.getElementById('players-mode-badge').innerHTML = gameMode==='football'
     ? '<span class="mode-badge football">⚽ Modo fútbol</span>'
     : '<span class="mode-badge classic">🎭 Modo clásico</span>';
@@ -755,6 +940,39 @@ function goToPlayers() {
   impostorCount = 1;
   renderPlayerTags();
   goTo('screen-players');
+}
+
+function goBackToPlayers() {
+  // Llamado desde "← Atrás" en screen-custom — conserva jugadores y configuración
+  document.getElementById('players-mode-badge').innerHTML = gameMode==='football'
+    ? '<span class="mode-badge football">⚽ Modo fútbol</span>'
+    : '<span class="mode-badge classic">🎭 Modo clásico</span>';
+  document.getElementById('custom-word-btn-wrap').style.display = gameMode==='football' ? 'none' : 'block';
+  renderPlayerTags();
+  goTo('screen-players');
+}
+
+function goBackToMode() {
+  // Restaurar selección visual del modo si ya había uno elegido
+  if (gameMode) {
+    document.getElementById('card-classic').className = 'mode-card' + (gameMode==='classic' ? ' selected-classic' : '');
+    document.getElementById('card-football').className = 'mode-card' + (gameMode==='football' ? ' selected-football' : '');
+    document.getElementById('classic-options').style.display = gameMode==='classic' ? 'block' : 'none';
+    document.getElementById('btn-to-players').disabled = false;
+    // Restaurar pill de dificultad activa
+    document.querySelectorAll('#classic-options .diff-pill').forEach(b => {
+      b.classList.toggle('active', b.getAttribute('onclick').includes(`'${difficulty}'`));
+    });
+    // Restaurar categoría seleccionada
+    const sel = document.getElementById('category-select');
+    if (sel) sel.value = selectedCategory;
+  }
+  goTo('screen-mode');
+}
+
+function goToCustom() {
+  renderCustomHistory();
+  goTo('screen-custom');
 }
 
 // ── JUGADORES ─────────────────────────────────────────────────────
@@ -849,6 +1067,7 @@ function startGameCustom() {
   if (difficulty !== 'none' && !h) { alert('Escribe la pista'); return; }
   gameSource = 'custom';
   gameWord = w; gameHint = h;
+  addToCustomHistory(w, h);
   launchGame();
 }
 
@@ -1058,13 +1277,24 @@ function showFootballerPhoto(src, name) {
   wrap.style.display = 'flex';
   wrap.style.justifyContent = 'center';
   if (src) {
-    img.src = src;
+    img.classList.remove('loaded');
     img.style.display = 'block';
     ph.style.display  = 'none';
+    img.onload = () => img.classList.add('loaded');
+    img.onerror = () => { // si falla la carga, muestra placeholder
+      img.style.display = 'none';
+      ph.style.display  = 'flex';
+      ph.textContent    = name.charAt(0).toUpperCase();
+    };
+    img.src = src;
   } else {
     img.style.display = 'none';
     ph.style.display  = 'flex';
     ph.textContent    = name.charAt(0).toUpperCase();
+    // Resetear animación para que se dispare de nuevo
+    ph.style.animation = 'none';
+    void ph.offsetWidth;
+    ph.style.animation = '';
   }
 }
 
@@ -1165,6 +1395,19 @@ function setupReveal() {
   window.addEventListener('mouseup', onEnd);
 })();
 
+// ── ANIMACIONES DE RESULTADO ──────────────────────────────────────
+function applyResultStyle(screenId, type) {
+  // type: 'win' | 'lose' | 'neutral'
+  const screen = document.getElementById(screenId);
+  screen.classList.remove('result-bg-win','result-bg-lose','result-bg-neutral');
+  screen.classList.add('result-bg-' + type);
+  // Animar icono y texto
+  const icon = screen.querySelector('[id$="-icon"], .result-icon, .elim-icon');
+  const title = screen.querySelector('[id$="-title"], .result-title, .elim-title');
+  if (icon)  { icon.classList.remove('result-icon-anim');  void icon.offsetWidth;  icon.classList.add('result-icon-anim'); }
+  if (title) { title.classList.remove('result-text-anim'); void title.offsetWidth; title.classList.add('result-text-anim'); }
+}
+
 // ── DEBATE ────────────────────────────────────────────────────────
 function renderTurnOrderIn(elementId) {
   const medals = ['🥇','🥈','🥉'];
@@ -1206,6 +1449,10 @@ function confirmVote() {
   if (voteSelected === null) return;
   const votedName = activePlayers[voteSelected];
   const votedIsImpostor = impostors.includes(votedName);
+  // Limpiar secciones de resultado previas
+  document.getElementById('guess-section').style.display = 'none';
+  document.getElementById('guess-input').value = '';
+  document.getElementById('final-section').style.display = 'none';
 
   if (votedIsImpostor) {
     // Pillaron a un impostor
@@ -1213,11 +1460,7 @@ function confirmVote() {
     const [icon,title,sub] = pick(MSGS_CAUGHT);
     document.getElementById('result-icon').textContent = icon;
     document.getElementById('result-title').textContent = title;
-    // Subtítulo adaptado: si hay más impostores activos, avisa
-    const otherImpostors = impostors.filter(p => p !== votedName && activePlayers.includes(p));
-    document.getElementById('result-sub').textContent = otherImpostors.length > 0
-      ? `${sub} Pero... ¿será el único?`
-      : sub;
+    document.getElementById('result-sub').textContent = sub;
     document.getElementById('guess-label').textContent = gameMode==='football'
       ? 'El impostor puede intentar adivinar el futbolista para salvarse:'
       : 'El impostor puede intentar adivinar la palabra para salvarse:';
@@ -1225,15 +1468,18 @@ function confirmVote() {
     document.getElementById('guess-input').dataset.guesser = votedName;
     document.getElementById('guess-section').style.display = 'block';
     document.getElementById('final-section').style.display = 'none';
-    // Puntos: no-impostores activos +2 pts
     activePlayers.filter(p => !impostors.includes(p)).forEach(p => addScore(p, 2));
-    // Eliminar al impostor pillado del juego
     activePlayers.splice(voteSelected, 1);
     impostors.splice(impostors.indexOf(votedName), 1);
+    // Ahora que el impostor está eliminado, comprobar si quedan más
+    const otherImpostorsStillActive = impostors.filter(p => activePlayers.includes(p));
+    if (otherImpostorsStillActive.length > 0) {
+      document.getElementById('result-sub').textContent = `${sub} Pero... ¿será el único?`;
+    }
+    applyResultStyle('screen-result', 'win');
     goTo('screen-result');
 
   } else {
-    // Votaron a un inocente
     soundFail();
     const [icon, title, title2] = pick(MSGS_WRONG_VOTE);
     document.getElementById('elim-icon').textContent = icon;
@@ -1242,7 +1488,6 @@ function confirmVote() {
     document.getElementById('elim-msg').textContent = title2;
     activePlayers.splice(voteSelected, 1);
 
-    // Condición de victoria impostor: impostores activos >= no-impostores activos
     const activeImpostors = impostors.filter(p => activePlayers.includes(p));
     const activeNonImpostors = activePlayers.filter(p => !impostors.includes(p));
 
@@ -1259,17 +1504,24 @@ function confirmVote() {
         document.getElementById('impostor-wins-word').textContent = gameWord;
         activeImpostors.forEach(p => addScore(p, 5));
         soundFail();
+        applyResultStyle('screen-impostor-wins', 'lose');
         goTo('screen-impostor-wins');
       };
     } else {
       document.getElementById('btn-elim-next').textContent = 'Siguiente ronda →';
       document.getElementById('btn-elim-next').onclick = () => nextRound();
     }
+    applyResultStyle('screen-eliminated', 'neutral');
     goTo('screen-eliminated');
   }
 }
 
-function nextRound() { round++; setupDebate(); }
+function nextRound() {
+  round++;
+  // Recalcular orden de turno con los jugadores activos actuales
+  turnOrder = [...activePlayers].sort(() => Math.random() - 0.5);
+  setupDebate();
+}
 
 // ── ADIVINAR ──────────────────────────────────────────────────────
 function normalize(str) {
@@ -1291,11 +1543,10 @@ function checkGuess() {
     document.getElementById('result-title').textContent = '¡El impostor se salva!';
     document.getElementById('result-sub').textContent = `${guesser} adivinó ${label} y escapa.`;
     addScore(guesser, 3);
-    // Si hay más impostores activos, la partida continúa
+    applyResultStyle('screen-result', 'lose');
     if (remainingImpostors.length > 0) {
       document.getElementById('reveal-final-word').textContent = gameWord;
       document.getElementById('reveal-impostor').textContent = guesser;
-      // Mostrar botón de continuar en lugar de finalizar
       document.getElementById('final-section').innerHTML = `
         <hr class="divider">
         <p style="font-size:0.9rem;color:var(--muted);margin-bottom:0.5rem">La palabra era: <strong style="color:var(--accent)">${gameWord}</strong></p>
@@ -1312,6 +1563,7 @@ function checkGuess() {
     document.getElementById('result-title').textContent = '¡Los jugadores ganan!';
     document.getElementById('result-sub').textContent = `El impostor falló. Era ${label}.`;
     activePlayers.filter(p => !impostors.includes(p)).forEach(p => addScore(p, 1));
+    applyResultStyle('screen-result', 'win');
   }
 
   // Pantalla final estándar
@@ -1343,12 +1595,19 @@ function playAgainSamePlayers() {
   document.getElementById('custom-word').value = '';
   document.getElementById('custom-hint').value = '';
   document.body.classList.remove('football-bg');
+  document.getElementById('players-mode-badge').innerHTML = gameMode==='football'
+    ? '<span class="mode-badge football">⚽ Modo fútbol</span>'
+    : '<span class="mode-badge classic">🎭 Modo clásico</span>';
+  document.getElementById('custom-word-btn-wrap').style.display = gameMode==='football' ? 'none' : 'block';
   renderPlayerTags();
   goTo('screen-players');
 }
 
 function goHome() {
   document.body.classList.remove('football-bg');
+  if (taglineTimer) clearTimeout(taglineTimer);
+  taglineIdx = 0;
+  startTaglineRotation();
   goTo('screen-home');
 }
 
@@ -1359,9 +1618,46 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+// ── HOME ANIMACIONES ──────────────────────────────────────────────
+const HOME_TAGLINES = [
+  '¿En quién confías?',
+  'Uno de vosotros miente.',
+  'Nadie es lo que parece.',
+  'La verdad tiene un impostor.',
+  'Cuidado con lo que dices.',
+  '¿Seguro que lo conoces?',
+  'Alguien aquí esconde algo.',
+  'El engaño empieza ahora.',
+];
+let taglineIdx = 0;
+let taglineTimer = null;
+
+function startTaglineRotation() {
+  const el = document.getElementById('home-tagline');
+  if (!el) return;
+  el.textContent = HOME_TAGLINES[taglineIdx];
+  el.style.animation = 'none';
+  void el.offsetWidth; // reflow para reiniciar animación
+  el.style.animation = 'taglineFade 0.6s ease';
+  taglineTimer = setTimeout(() => {
+    taglineIdx = (taglineIdx + 1) % HOME_TAGLINES.length;
+    startTaglineRotation();
+  }, 3000);
+}
+
+function animateHomeLetters() {
+  const letters = document.querySelectorAll('.home-letter');
+  letters.forEach((l, i) => {
+    l.style.animationDelay = (i * 0.07) + 's';
+  });
+}
+
 // ── INIT ──────────────────────────────────────────────────────────
 loadScores();
+loadCustomHistory();
 buildCategorySelect();
+animateHomeLetters();
+startTaglineRotation();
 
 document.getElementById('btn-to-players').addEventListener('click', goToPlayers);
 document.getElementById('btn-go-vote').addEventListener('click', setupVote);
