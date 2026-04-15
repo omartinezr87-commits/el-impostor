@@ -683,6 +683,7 @@ let turnOrder=[];
 let usedWords={};
 let gameSource='random';
 let photoCache={};
+let revealGen=0;
 
 // ── NAVEGACIÓN ────────────────────────────────────────────────────
 function goTo(id) {
@@ -1048,6 +1049,7 @@ function hideFootballerPhoto() {
 
 // ── REVEAL ────────────────────────────────────────────────────────
 function setupReveal() {
+  const gen = ++revealGen; // generación de esta llamada concreta
   const player = activePlayers[currentRevealIdx];
   const isImpostor = player === impostorName;
 
@@ -1073,13 +1075,15 @@ function setupReveal() {
     hintEl.textContent  = '';
 
     if (gameMode === 'football') {
-      // Foto circular para futbolistas
       document.getElementById('footballer-photo').style.borderRadius = '50%';
-      fetchFootballerPhoto(gameWord).then(src => showFootballerPhoto(src, gameWord));
+      fetchFootballerPhoto(gameWord).then(src => {
+        if (revealGen === gen) showFootballerPhoto(src, gameWord);
+      });
     } else {
-      // Foto cuadrada redondeada para palabras clásicas
       document.getElementById('footballer-photo').style.borderRadius = '14px';
-      fetchWordPhoto(gameWord).then(src => showFootballerPhoto(src, gameWord));
+      fetchWordPhoto(gameWord).then(src => {
+        if (revealGen === gen) showFootballerPhoto(src, gameWord);
+      });
     }
   }
 
