@@ -266,7 +266,103 @@
     .history-item-hint { font-size: 0.78rem; color: var(--muted); }
     .history-item-use { font-size: 0.75rem; color: var(--accent); flex-shrink: 0; margin-left: 0.8rem; }
 
-    /* ── HOME REDESIGN ── */
+    /* ── DEBATE MEJORADO ── */
+    #screen-debate { position: relative; overflow: hidden; }
+    #debate-bg {
+      position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+    }
+    .debate-shadow {
+      position: absolute; border-radius: 50%;
+      background: radial-gradient(circle, rgba(232,197,71,0.05) 0%, transparent 65%);
+      animation: debateDrift 10s ease-in-out infinite;
+    }
+    .debate-shadow.d1 { width: 380px; height: 380px; top: -120px; right: -100px; animation-duration: 12s; }
+    .debate-shadow.d2 { width: 300px; height: 300px; bottom: -80px; left: -80px; animation-delay: -4s; animation-duration: 15s;
+      background: radial-gradient(circle, rgba(232,123,71,0.05) 0%, transparent 65%); }
+    .debate-shadow.d3 { width: 200px; height: 200px; top: 40%; left: 20%; animation-delay: -8s; animation-duration: 9s;
+      background: radial-gradient(circle, rgba(232,197,71,0.03) 0%, transparent 65%); }
+    @keyframes debateDrift {
+      0%,100% { transform: translate(0,0) scale(1); }
+      33%      { transform: translate(-20px,25px) scale(1.08); }
+      66%      { transform: translate(15px,-18px) scale(0.94); }
+    }
+    #screen-debate > *:not(#debate-bg) { position: relative; z-index: 1; }
+    #debate-round-badge { margin-bottom: 0.2rem; }
+    #debate-round {
+      font-family: var(--font); font-size: 3rem; color: var(--accent);
+      line-height: 1; text-shadow: 0 0 24px rgba(232,197,71,0.3);
+    }
+    #screen-debate h2 {
+      font-size: 1.8rem; text-align: center; margin-bottom: 0;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+    }
+    #btn-go-vote {
+      font-size: 1.05rem; padding: 1rem;
+      box-shadow: 0 0 20px rgba(232,197,71,0.2);
+      animation: btnGlow 2.5s ease-in-out infinite;
+    }
+
+    /* ── SCREEN READY MEJORADO ── */
+    #screen-ready { text-align: center; }
+    #ready-icon {
+      font-size: 3.5rem; display: block; margin-bottom: 0.5rem;
+      animation: readyIconPop 0.5s cubic-bezier(0.175,0.885,0.32,1.275) both;
+    }
+    @keyframes readyIconPop {
+      from { opacity: 0; transform: scale(0.3) rotate(-15deg); }
+      to   { opacity: 1; transform: scale(1) rotate(0deg); }
+    }
+    #screen-ready h2 { font-size: 2rem; margin-bottom: 0.3rem; }
+    #screen-ready > p { font-size: 0.85rem; color: var(--muted); line-height: 1.5; margin-bottom: 0.8rem; }
+    .turn-order-item {
+      display: flex; align-items: center; gap: 0.8rem;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 0.8rem 1rem;
+      animation: orderItemIn 0.3s ease both;
+    }
+    .turn-order-item:nth-child(1) { animation-delay: 0.05s; }
+    .turn-order-item:nth-child(2) { animation-delay: 0.1s; }
+    .turn-order-item:nth-child(3) { animation-delay: 0.15s; }
+    .turn-order-item:nth-child(4) { animation-delay: 0.2s; }
+    .turn-order-item:nth-child(5) { animation-delay: 0.25s; }
+    .turn-order-item:nth-child(n+6) { animation-delay: 0.3s; }
+    @keyframes orderItemIn {
+      from { opacity: 0; transform: translateX(-12px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    .turn-order-medal { font-size: 1.2rem; min-width: 2rem; text-align: center; }
+    .turn-order-name { font-size: 1.05rem; color: var(--text); font-family: var(--font); }
+    .turn-order-num { font-size: 0.9rem; color: var(--muted); min-width: 2rem; text-align: center; font-family: var(--sans); }
+
+    /* ── MODO FÚTBOL: ACENTO VERDE ── */
+    .football-mode .btn:not(.secondary):not(#btn-toggle-order) { background: var(--accent-football); color: #fff; }
+    .football-mode .btn:not(.secondary):not(#btn-toggle-order):active { opacity: 0.85; }
+    .football-mode #debate-round { color: var(--accent-football); text-shadow: 0 0 24px rgba(76,175,125,0.3); }
+    .football-mode #home-title,
+    .football-mode .role-word:not(.impostor-word) { color: var(--accent-football); }
+    .football-mode .debate-shadow.d1 { background: radial-gradient(circle, rgba(76,175,125,0.06) 0%, transparent 65%); }
+    .football-mode .debate-shadow.d3 { background: radial-gradient(circle, rgba(76,175,125,0.04) 0%, transparent 65%); }
+    .football-mode #btn-go-vote { box-shadow: 0 0 20px rgba(76,175,125,0.25); animation: btnGlowGreen 2.5s ease-in-out infinite; }
+    @keyframes btnGlowGreen {
+      0%,100% { box-shadow: 0 0 20px rgba(76,175,125,0.2); }
+      50%      { box-shadow: 0 0 36px rgba(76,175,125,0.4); }
+    }
+    .football-mode input:focus, .football-mode select:focus { border-color: var(--accent-football); }
+    .football-mode .score-item.leader { border-color: var(--accent-football); background: rgba(76,175,125,0.06); }
+    .football-mode .score-item .score-pts { color: var(--accent-football); }
+    #offline-toast {
+      display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+      background: #2a2a2a; border-bottom: 1px solid rgba(232,123,71,0.4);
+      color: var(--muted); font-size: 0.8rem; text-align: center;
+      padding: 0.5rem 1rem; letter-spacing: 0.3px;
+      animation: toastIn 0.3s ease;
+    }
+    #offline-toast.visible { display: block; }
+    @keyframes toastIn {
+      from { transform: translateY(-100%); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+    #offline-toast span { color: var(--accent2); margin-right: 0.3rem; }
     #home-bg {
       position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;
     }
@@ -338,6 +434,7 @@
   </style>
 </head>
 <body>
+<div id="offline-toast"><span>⚠</span>Sin conexión — las fotos no están disponibles</div>
 
 <!-- FONDO CAMPO FÚTBOL (visible solo en modo fútbol) -->
 <div id="field-background">
@@ -538,22 +635,32 @@
 </div>
 
 <!-- READY: todos han visto su rol + orden de turno -->
-<div id="screen-ready" class="screen" style="gap:0.8rem">
-  <div style="font-size:2.5rem;text-align:center">🎭</div>
-  <h2 style="text-align:center">¡Todos listos!</h2>
-  <p style="color:var(--muted);font-size:0.85rem;text-align:center;line-height:1.5">Este es el orden en que habla cada jugador esta ronda:</p>
-  <div id="turn-order-list" style="display:flex;flex-direction:column;gap:0.5rem;margin-top:0.3rem"></div>
+<div id="screen-ready" class="screen" style="gap:0.6rem">
+  <span id="ready-icon">🎭</span>
+  <h2>¡Todos listos!</h2>
+  <p>Este es el orden en que habla cada jugador:</p>
+  <div id="turn-order-list" style="display:flex;flex-direction:column;gap:0.5rem;margin-top:0.2rem"></div>
   <div class="gap"></div>
   <button class="btn" onclick="setupDebate()">Empezar debate →</button>
 </div>
 
 <!-- DEBATE -->
 <div id="screen-debate" class="screen" style="gap:0.8rem">
-  <div class="debate-round" id="debate-round" style="text-align:center"></div>
-  <h2 style="text-align:center;margin-bottom:0">¡Empieza el debate!</h2>
+  <div id="debate-bg">
+    <div class="debate-shadow d1"></div>
+    <div class="debate-shadow d2"></div>
+    <div class="debate-shadow d3"></div>
+  </div>
+  <div id="debate-round-badge" style="display:flex;align-items:center;justify-content:center;gap:0.6rem">
+    <div id="debate-round"></div>
+    <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;line-height:1.3">de<br>debate</div>
+  </div>
+  <h2>¡Empieza el debate!</h2>
   <p style="font-size:0.85rem;color:var(--muted);line-height:1.6;text-align:center">Cada jugador dice algo relacionado con su palabra sin revelarla. Luego votad.</p>
-  <p style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:0.5rem">Orden de turno</p>
-  <div id="debate-turn-order" style="display:flex;flex-direction:column;gap:0.5rem"></div>
+  <button class="btn secondary" id="btn-toggle-order" onclick="toggleDebateOrder()" style="font-size:0.85rem;padding:0.6rem 1rem">👁 Ver orden de turno</button>
+  <div id="debate-turn-order-wrap" style="display:none;flex-direction:column;gap:0.5rem">
+    <div id="debate-turn-order" style="display:flex;flex-direction:column;gap:0.5rem"></div>
+  </div>
   <div class="gap"></div>
   <button class="btn" id="btn-go-vote">Votar →</button>
 </div>
@@ -1094,6 +1201,7 @@ function launchGame() {
   currentRevealIdx = 0; round = 1; voteSelected = null;
   photoCache = {};
   document.body.classList.toggle('football-bg', gameMode === 'football');
+  document.body.classList.toggle('football-mode', gameMode === 'football');
   gaEvent('partida_iniciada', {
     modo: gameMode,
     jugadores: allPlayers.length,
@@ -1432,20 +1540,34 @@ function applyResultStyle(screenId, type) {
 function renderTurnOrderIn(elementId) {
   const medals = ['🥇','🥈','🥉'];
   document.getElementById(elementId).innerHTML = turnOrder.map((p,i) => {
-    const label = i < 3 ? medals[i] : `<span style="color:var(--muted);font-size:0.9rem;font-family:var(--sans)">${i+1}º</span>`;
-    return `<div style="display:flex;align-items:center;gap:0.8rem;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.7rem 1rem">
-      <span style="font-size:1.1rem;min-width:2rem;text-align:center">${label}</span>
-      <span style="font-size:1rem;color:var(--text)">${p}</span>
-    </div>`;
+    const medal = i < 3
+      ? `<span class="turn-order-medal">${medals[i]}</span>`
+      : `<span class="turn-order-num">${i+1}º</span>`;
+    return `<div class="turn-order-item">${medal}<span class="turn-order-name">${p}</span></div>`;
   }).join('');
 }
 
-function renderTurnOrder() { renderTurnOrderIn('turn-order-list'); }
-
 function setupDebate() {
   document.getElementById('debate-round').textContent = `Ronda ${round}`;
+  document.getElementById('debate-turn-order-wrap').style.display = 'none';
+  document.getElementById('btn-toggle-order').textContent = '👁 Ver orden de turno';
   renderTurnOrderIn('debate-turn-order');
   goTo('screen-debate');
+}
+
+function renderTurnOrder() {
+  renderTurnOrderIn('turn-order-list');
+  // Resetear animación del icono para que se repita en cada visita a screen-ready
+  const icon = document.getElementById('ready-icon');
+  if (icon) { icon.style.animation = 'none'; void icon.offsetWidth; icon.style.animation = ''; }
+}
+
+function toggleDebateOrder() {
+  const wrap = document.getElementById('debate-turn-order-wrap');
+  const btn  = document.getElementById('btn-toggle-order');
+  const visible = wrap.style.display !== 'none';
+  wrap.style.display = visible ? 'none' : 'flex';
+  btn.textContent = visible ? '👁 Ver orden de turno' : '✕ Ocultar orden';
 }
 
 // ── VOTE ──────────────────────────────────────────────────────────
@@ -1633,7 +1755,7 @@ function repeatGame() {
 function playAgainSamePlayers() {
   document.getElementById('custom-word').value = '';
   document.getElementById('custom-hint').value = '';
-  document.body.classList.remove('football-bg');
+  document.body.classList.remove('football-bg', 'football-mode');
   document.getElementById('players-mode-badge').innerHTML = gameMode==='football'
     ? '<span class="mode-badge football">⚽ Modo fútbol</span>'
     : '<span class="mode-badge classic">🎭 Modo clásico</span>';
@@ -1643,7 +1765,7 @@ function playAgainSamePlayers() {
 }
 
 function goHome() {
-  document.body.classList.remove('football-bg');
+  document.body.classList.remove('football-bg', 'football-mode');
   if (taglineTimer) clearTimeout(taglineTimer);
   taglineIdx = 0;
   startTaglineRotation();
@@ -1656,6 +1778,19 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(() => {});
   });
 }
+
+// ── CONEXIÓN ──────────────────────────────────────────────────────
+function updateOnlineStatus() {
+  const toast = document.getElementById('offline-toast');
+  if (!navigator.onLine) {
+    toast.classList.add('visible');
+  } else {
+    toast.classList.remove('visible');
+  }
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus(); // comprobar estado inicial
 
 // ── HOME ANIMACIONES ──────────────────────────────────────────────
 const HOME_TAGLINES = [
