@@ -931,7 +931,9 @@ function selectDiff(btn, val) {
 }
 
 function goToPlayers() {
-  // Llamado desde "Nueva partida" — limpia jugadores y configuración
+  // Guardar categoría seleccionada del DOM antes de salir
+  const sel = document.getElementById('category-select');
+  if (sel) selectedCategory = sel.value;
   document.getElementById('players-mode-badge').innerHTML = gameMode==='football'
     ? '<span class="mode-badge football">⚽ Modo fútbol</span>'
     : '<span class="mode-badge classic">🎭 Modo clásico</span>';
@@ -1568,8 +1570,6 @@ function checkGuess() {
 
   // Pantalla final estándar
   const impostorDisplay = allImpostorsOriginal.join(', ');
-  document.getElementById('reveal-final-word').textContent = gameWord;
-  document.getElementById('reveal-impostor').textContent = impostorDisplay;
   document.getElementById('final-section').innerHTML = `
     <hr class="divider">
     <p style="font-size:0.9rem;color:var(--muted);margin-bottom:0.5rem">La palabra era: <strong style="color:var(--accent)">${gameWord}</strong></p>
