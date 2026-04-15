@@ -837,6 +837,95 @@ function launchGame() {
   setupReveal();
 }
 
+// ── FOTOS MODO CLÁSICO (Wikipedia) ───────────────────────────────
+const WIKI_CLASSIC = {
+  // Todo / multi-categoría
+  'Pizza':'Pizza','Playa':'Beach','Guitarra':'Guitar','Avión':'Airplane',
+  'Tiburón':'Shark','Castillo':'Castle','Chocolate':'Chocolate','Tren':'Train',
+  'León':'Lion','Nevera':'Refrigerator','Médico':'Physician','Luna':'Moon',
+  'Sushi':'Sushi','Bicicleta':'Bicycle','Volcán':'Volcano','Diamante':'Diamond',
+  'Vampiro':'Vampire','Cohete':'Rocket','Espejo':'Mirror','Biblioteca':'Library',
+  'Submarino':'Submarine','Paella':'Paella','Dinosaurio':'Dinosaur','Circo':'Circus',
+  'Desierto':'Desert','Tornado':'Tornado','Faro':'Lighthouse','Momia':'Mummy',
+  'Iglú':'Igloo','Mariposa':'Butterfly','Pirata':'Piracy','Robot':'Robot',
+  'Espía':'Spy','Fantasma':'Ghost','Elefante':'Elephant','Helado':'Ice_cream',
+  'Fútbol':'Association_football','Concierto':'Concert','Aeropuerto':'Airport',
+  'Cementerio':'Cemetery','Cocodrilo':'Crocodile','Hamburguesa':'Hamburger',
+  'Pingüino':'Penguin','Catedral':'Cathedral','Surfista':'Surfing','Brujo':'Warlock',
+  'Astronauta':'Astronaut','Terremoto':'Earthquake','Submarinista':'Scuba_diving',
+  'Lobo':'Wolf',
+  // Comida
+  'Taco':'Taco','Croissant':'Croissant','Ramen':'Ramen','Pulpo':'Octopus',
+  'Gazpacho':'Gazpacho','Salmón':'Salmon','Tortilla':'Tortilla_española',
+  'Queso':'Cheese','Trufa':'Truffle','Curry':'Curry','Fondue':'Fondue',
+  'Ceviche':'Ceviche','Tiramisú':'Tiramisu','Hummus':'Hummus','Crepe':'Crêpe',
+  'Dim Sum':'Dim_sum','Jamón':'Jamón','Langosta':'Lobster','Macarrón':'Pasta',
+  'Nachos':'Nachos','Ostras':'Oyster','Risotto':'Risotto','Steak':'Steak',
+  'Wasabi':'Wasabi',
+  // Animales
+  'Jirafa':'Giraffe','Águila':'Eagle','Hipopótamo':'Hippopotamus',
+  'Murciélago':'Bat','Canguro':'Kangaroo','Panda':'Giant_panda',
+  'Delfín':'Dolphin','Gorila':'Gorilla','Cobra':'Cobra','Flamenco':'Flamingo',
+  'Tortuga':'Turtle','Oso polar':'Polar_bear','Camello':'Camel',
+  'Rinoceronte':'Rhinoceros','Medusa':'Jellyfish','Cebra':'Zebra',
+  'Pavo real':'Peacock','Escorpión':'Scorpion','Nutria':'Otter',
+  'Leopardo':'Leopard','Ballena':'Whale','Cacatúa':'Cockatoo',
+  // Cine y TV
+  'Zombie':'Zombie','Superhéroe':'Superhero','Oscar':'Academy_Award',
+  'Director':'Film_director','Doblaje':'Dubbing_(filmmaking)','Trailer':'Trailer_(promotion)',
+  'Comedia':'Comedy_film','Villano':'Villain','Secuela':'Sequel',
+  'Monstruo':'Monster','Alienígena':'Extraterrestrial_life','Detective':'Detective',
+  'Ninja':'Ninja','Holograma':'Holography','Gladiador':'Gladiator',
+  'Hacker':'Hacker','Bruja':'Witch','Androide':'Android_(robot)',
+  'Caballero':'Knight','Samurái':'Samurai','Serial killer':'Serial_killer',
+  'Doble agente':'Double_agent',
+  // Música
+  'Batería':'Drum_kit','Micrófono':'Microphone','Disco':'Phonograph_record',
+  'Bajo':'Bass_guitar','Ópera':'Opera','DJ':'Disc_jockey','Coro':'Choir',
+  'Piano':'Piano','Rap':'Hip-hop_music','Amplificador':'Guitar_amplifier',
+  'Festival':'Music_festival','Violín':'Violin','Estudio':'Recording_studio',
+  'Saxofón':'Saxophone','Trompeta':'Trumpet','Flauta':'Flute',
+  'Acordeón':'Accordion','Arpa':'Harp','Sintetizador':'Synthesizer',
+  'Ukelele':'Ukulele','Maracas':'Maracas','Orquesta':'Orchestra',
+  'Solista':'Soloist','Remix':'Remix','Gira':'Concert_tour','Backstage':'Backstage',
+  // Deporte
+  'Tenis':'Tennis','Boxeo':'Boxing','Natación':'Swimming_(sport)',
+  'Ciclismo':'Cycling','Baloncesto':'Basketball','Golf':'Golf','Rugby':'Rugby_union',
+  'Ski':'Skiing','Atletismo':'Athletics_(sport)','Surf':'Surfing',
+  'Escalada':'Rock_climbing','Esgrima':'Fencing','Judo':'Judo',
+  'Voleibol':'Volleyball','Béisbol':'Baseball','Hockey':'Hockey',
+  'Kárate':'Karate','Remo':'Rowing_(sport)','Halterofilia':'Weightlifting',
+  'Triatlón':'Triathlon','Padel':'Padel','Lucha libre':'Lucha_libre',
+  'Motociclismo':'Motorcycle_racing','Patinaje':'Ice_skating',
+  'Tiro con arco':'Archery','Pelota vasca':'Basque_pelota',
+  'Waterpolo':'Water_polo','Balonmano':'Handball','Squash':'Squash_(sport)',
+  // Lugares
+  'Selva':'Jungle','Cueva':'Cave','Fábrica':'Factory','Estadio':'Stadium',
+  'Fosa marina':'Ocean_trench','Rascacielos':'Skyscraper','Laberinto':'Labyrinth',
+  'Pirámide':'Egyptian_pyramids','Oasis':'Oasis','Acantilado':'Cliff',
+  'Bunker':'Bunker','Finca':'Estate_(land)','Mezquita':'Mosque',
+  'Palacio':'Palace','Puerto':'Harbor','Mina':'Mine_(excavation)',
+  'Glacier':'Glacier','Pantano':'Swamp','Mercado':'Market_(place)',
+};
+
+async function fetchWordPhoto(word) {
+  if (photoCache[word] !== undefined) return photoCache[word];
+  const title = WIKI_CLASSIC[word] || word.replace(/ /g, '_');
+  const url = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=pageimages&piprop=thumbnail&pithumbsize=300&format=json&origin=*`;
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    const pages = data.query.pages;
+    const page = Object.values(pages)[0];
+    const src = page?.thumbnail?.source || null;
+    photoCache[word] = src;
+    return src;
+  } catch(e) {
+    photoCache[word] = null;
+    return null;
+  }
+}
+
 // ── FOTOS FUTBOLISTAS (Wikipedia) ─────────────────────────────────
 // Mapeo nombre banco → título Wikipedia (solo para nombres con caracteres especiales o ambigüedades)
 const WIKI_TITLES = {
@@ -937,6 +1026,7 @@ function showFootballerPhoto(src, name) {
   const wrap  = document.getElementById('footballer-photo-wrap');
   const img   = document.getElementById('footballer-photo');
   const ph    = document.getElementById('footballer-photo-placeholder');
+  ph.style.borderRadius = img.style.borderRadius;
   wrap.style.display = 'flex';
   wrap.style.justifyContent = 'center';
   if (src) {
@@ -966,7 +1056,7 @@ function setupReveal() {
   const hintEl  = document.getElementById('reveal-hint');
   const labelEl = document.getElementById('reveal-role-label');
 
-  // Ocultar foto por defecto (se muestra solo al deslizar si aplica)
+  // Ocultar foto por defecto
   hideFootballerPhoto();
 
   if (isImpostor) {
@@ -981,9 +1071,15 @@ function setupReveal() {
     wordEl.textContent  = gameWord;
     wordEl.className    = 'role-word';
     hintEl.textContent  = '';
-    // Pre-cargar foto si es modo fútbol
+
     if (gameMode === 'football') {
+      // Foto circular para futbolistas
+      document.getElementById('footballer-photo').style.borderRadius = '50%';
       fetchFootballerPhoto(gameWord).then(src => showFootballerPhoto(src, gameWord));
+    } else {
+      // Foto cuadrada redondeada para palabras clásicas
+      document.getElementById('footballer-photo').style.borderRadius = '14px';
+      fetchWordPhoto(gameWord).then(src => showFootballerPhoto(src, gameWord));
     }
   }
 
