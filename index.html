@@ -493,6 +493,7 @@
 
 <!-- HOME -->
 <div id="screen-home" class="screen active">
+  <button id="btn-mute" onclick="toggleMusic()" style="position:absolute;top:1.2rem;right:1.2rem;z-index:10;background:transparent;border:none;font-size:1.4rem;cursor:pointer;opacity:0.6;padding:0.3rem">🔊</button>
   <div id="home-bg">
     <div class="home-shadow s1"></div>
     <div class="home-shadow s2"></div>
@@ -915,29 +916,180 @@ function pick(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
 
 // ── AUDIO ─────────────────────────────────────────────────────────
 let audioCtx = null;
+let musicMuted = false;
+let musicNodes = null; // { osc, gain, lfo, lfoGain }
+
 function getCtx() {
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   if (audioCtx.state === 'suspended') audioCtx.resume();
   return audioCtx;
 }
-function playTone(freq, type, duration, vol=0.3) {
+
+function vibrate(pattern) { try { navigator.vibrate && navigator.vibrate(pattern); } catch(e){} }
+
+// ── Función base ──
+function playTone(freq, type, duration, vol=0.3, startFreq=null) {
   try {
     const ctx = getCtx();
     const o = ctx.createOscillator(), g = ctx.createGain();
     o.connect(g); g.connect(ctx.destination);
-    o.type = type; o.frequency.value = freq;
+    o.type = type;
+    if (startFreq) {
+      o.frequency.setValueAtTime(startFreq, ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(freq, ctx.currentTime + duration * 0.6);
+    } else {
+      o.frequency.value = freq;
+    }
     g.gain.setValueAtTime(vol, ctx.currentTime);
     g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
     o.start(); o.stop(ctx.currentTime + duration);
   } catch(e) {}
 }
-function vibrate(pattern) { try { navigator.vibrate && navigator.vibrate(pattern); } catch(e){} }
-function soundReveal()  { playTone(440,'sine',0.15); setTimeout(()=>playTone(660,'sine',0.2),120); }
-function soundSuccess() { vibrate([50,30,50]); [523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,'sine',0.25),i*100)); }
-function soundFail()    { vibrate([200,100,200]); playTone(300,'square',0.2,0.35); setTimeout(()=>playTone(220,'square',0.3,0.35),200); }
-function soundPass()    { playTone(330,'sine',0.1,0.2); }
+
+function playNoise(duration, vol=0.15) {
+  try {
+    const ctx = getCtx();
+    const buf = ctx.createBuffer(1, ctx.sampleRate * duration, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1);
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass'; filter.frequency.value = 800;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(vol, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    src.connect(filter); filter.connect(g); g.connect(ctx.destination);
+    src.start(); src.stop(ctx.currentTime + duration);
+  } catch(e) {}
+}
+
+// ── Sonidos mejorados ──
+function soundReveal() {
+  // Susurro ascendente — como algo que emerge
+  playTone(180, 'sine', 0.4, 0.08, 80);
+  setTimeout(() => playTone(320, 'sine', 0.3, 0.12, 180), 150);
+  setTimeout(() => playTone(520, 'sine', 0.25, 0.15), 320);
+}
+
+function soundImpostorReveal() {
+  // Golpe grave + distorsión — dramático
+  vibrate([80, 40, 120]);
+  playTone(80, 'sawtooth', 0.5, 0.4);
+  setTimeout(() => playTone(55, 'square', 0.6, 0.25), 80);
+  setTimeout(() => playNoise(0.3, 0.12), 100);
+  setTimeout(() => playTone(40, 'sine', 0.8, 0.2), 300);
+}
+
+function soundSuccess() {
+  // Fanfarria breve — victorioso
+  vibrate([50, 30, 50]);
+  const notes = [523, 659, 784, 659, 1047];
+  const times = [0, 80, 160, 240, 340];
+  notes.forEach((f, i) => setTimeout(() => playTone(f, 'sine', 0.22, 0.28), times[i]));
+}
+
+function soundFail() {
+  // Golpe seco descendente
+  vibrate([200, 100, 200]);
+  playTone(280, 'square', 0.15, 0.35);
+  setTimeout(() => playTone(200, 'square', 0.25, 0.3), 120);
+  setTimeout(() => playTone(140, 'sawtooth', 0.35, 0.2), 280);
+}
+
+function soundImpostorWins() {
+  // Acorde oscuro descendente — inquietante
+  vibrate([300, 100, 300]);
+  playTone(220, 'sawtooth', 1.0, 0.2);
+  setTimeout(() => playTone(185, 'sawtooth', 0.9, 0.18), 200);
+  setTimeout(() => playTone(147, 'sawtooth', 0.8, 0.7), 450);
+  setTimeout(() => playTone(110, 'sine', 1.2, 0.15), 700);
+}
+
+function soundWhistle() {
+  // Silbato de árbitro — solo en modo fútbol
+  playTone(1800, 'sine', 0.08, 0.3);
+  setTimeout(() => playTone(1900, 'sine', 0.06, 0.3), 90);
+  setTimeout(() => playTone(1800, 'sine', 0.12, 0.25), 170);
+}
+
+function soundPass() {
+  playTone(440, 'sine', 0.08, 0.15);
+}
+
+// ── Música ambiental (home + modos) ──
+function startAmbientMusic() {
+  if (musicMuted) return;
+  if (musicNodes) return; // ya sonando
+  try {
+    const ctx = getCtx();
+
+    // Bajo continuo pulsante
+    const bass = ctx.createOscillator();
+    const bassGain = ctx.createGain();
+    bass.type = 'sine';
+    bass.frequency.value = 55;
+    bassGain.gain.value = 0.06;
+    bass.connect(bassGain); bassGain.connect(ctx.destination);
+    bass.start();
+
+    // Pulso lento (LFO sobre el volumen del bajo)
+    const lfo = ctx.createOscillator();
+    const lfoGain = ctx.createGain();
+    lfo.type = 'sine';
+    lfo.frequency.value = 0.4; // 0.4 Hz — un pulso cada ~2.5s
+    lfoGain.gain.value = 0.04;
+    lfo.connect(lfoGain); lfoGain.connect(bassGain.gain);
+    lfo.start();
+
+    // Nota de tensión alta y tenue
+    const tension = ctx.createOscillator();
+    const tensionGain = ctx.createGain();
+    tension.type = 'sine';
+    tension.frequency.value = 233; // Bb3 — disonante
+    tensionGain.gain.value = 0.02;
+    tension.connect(tensionGain); tensionGain.connect(ctx.destination);
+    tension.start();
+
+    // Fade-in suave
+    bassGain.gain.setValueAtTime(0, ctx.currentTime);
+    bassGain.gain.linearRampToValueAtTime(0.06, ctx.currentTime + 2.5);
+    tensionGain.gain.setValueAtTime(0, ctx.currentTime);
+    tensionGain.gain.linearRampToValueAtTime(0.02, ctx.currentTime + 3.5);
+
+    musicNodes = { bass, bassGain, lfo, lfoGain, tension, tensionGain };
+  } catch(e) {}
+}
+
+function stopAmbientMusic() {
+  if (!musicNodes) return;
+  try {
+    const ctx = getCtx();
+    const { bassGain, tensionGain, bass, lfo, tension } = musicNodes;
+    bassGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.2);
+    tensionGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.2);
+    setTimeout(() => {
+      try { bass.stop(); lfo.stop(); tension.stop(); } catch(e) {}
+      musicNodes = null;
+    }, 1300);
+  } catch(e) { musicNodes = null; }
+}
+
+function toggleMusic() {
+  musicMuted = !musicMuted;
+  const btn = document.getElementById('btn-mute');
+  if (btn) btn.textContent = musicMuted ? '🔇' : '🔊';
+  if (musicMuted) {
+    stopAmbientMusic();
+  } else {
+    startAmbientMusic();
+  }
+  try { localStorage.setItem('impostor_muted', musicMuted ? '1' : '0'); } catch(e) {}
+}
+
+function loadMutePreference() {
+  try { musicMuted = localStorage.getItem('impostor_muted') === '1'; } catch(e) {}
+}
 
 // ── ANALYTICS ────────────────────────────────────────────────────
 function gaEvent(name, params) {
@@ -960,6 +1112,14 @@ function goTo(id) {
   document.querySelectorAll('.screen, #screen-reveal').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo(0, 0);
+  // Música ambiental solo en home y modo
+  if (id === 'screen-home' || id === 'screen-mode') {
+    startAmbientMusic();
+    const btn = document.getElementById('btn-mute');
+    if (btn) btn.textContent = musicMuted ? '🔇' : '🔊';
+  } else {
+    stopAmbientMusic();
+  }
 }
 
 // ── HISTORIAL PALABRAS PERSONALIZADAS ─────────────────────────────
@@ -1041,7 +1201,6 @@ function selectMode(mode) {
   document.getElementById('classic-options').style.display = mode==='classic' ? 'block' : 'none';
   document.getElementById('btn-to-players').disabled = false;
 }
-
 function selectDiff(btn, val) {
   difficulty = val;
   document.querySelectorAll('#classic-options .diff-pill').forEach(b => b.classList.remove('active'));
@@ -1453,6 +1612,11 @@ function setupReveal() {
     hintEl.textContent  = (gameMode==='football' || difficulty==='none')
       ? 'Nadie más sabe quién eres. ¡Disimula!'
       : 'Tu pista: ' + gameHint;
+    // Sonido dramático para el impostor (solo cuando desliza)
+    const coverEl = document.getElementById('reveal-cover');
+    const onImpostorReveal = () => { soundImpostorReveal(); coverEl.removeEventListener('touchmove', onImpostorReveal); coverEl.removeEventListener('mousemove', onImpostorReveal); };
+    coverEl.addEventListener('touchmove', onImpostorReveal, {once:true});
+    coverEl.addEventListener('mousemove', onImpostorReveal, {once:true});
   } else {
     labelEl.textContent = gameMode==='football' ? 'Tu futbolista' : 'Tu palabra secreta';
     wordEl.textContent  = gameWord;
@@ -1552,6 +1716,7 @@ function setupDebate() {
   document.getElementById('debate-turn-order-wrap').style.display = 'none';
   document.getElementById('btn-toggle-order').textContent = '👁 Ver orden de turno';
   renderTurnOrderIn('debate-turn-order');
+  if (gameMode === 'football') soundWhistle();
   goTo('screen-debate');
 }
 
@@ -1578,6 +1743,7 @@ function setupVote() {
   ).join('');
   document.getElementById('btn-vote').disabled = true;
   voteSelected = null;
+  if (gameMode === 'football') soundWhistle();
   goTo('screen-vote');
 }
 function selectVote(i, btn) {
@@ -1646,7 +1812,7 @@ function confirmVote() {
           : `${impostorList} era el impostor. ${iws}`;
         document.getElementById('impostor-wins-word').textContent = gameWord;
         activeImpostors.forEach(p => addScore(p, 5));
-        soundFail();
+        soundImpostorWins();
         applyResultStyle('screen-impostor-wins', 'lose');
         gaEvent('impostor_gana', { modo: gameMode, ronda: round });
         goTo('screen-impostor-wins');
@@ -1829,9 +1995,13 @@ function animateHomeLetters() {
 // ── INIT ──────────────────────────────────────────────────────────
 loadScores();
 loadCustomHistory();
+loadMutePreference();
 buildCategorySelect();
 animateHomeLetters();
 startTaglineRotation();
+// Actualizar icono mute según preferencia guardada
+const muteBtn = document.getElementById('btn-mute');
+if (muteBtn) muteBtn.textContent = musicMuted ? '🔇' : '🔊';
 
 document.getElementById('btn-to-players').addEventListener('click', goToPlayers);
 document.getElementById('btn-go-vote').addEventListener('click', setupVote);
