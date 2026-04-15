@@ -42,16 +42,6 @@
     #screen-reveal { display: none; position: relative; width: 100%; height: 100dvh; min-height: 100dvh; padding: 0; overflow: hidden; flex-direction: column; }
     #screen-reveal.active { display: flex; }
     .reveal-zone { position: relative; flex: 1; overflow: hidden; min-height: 0; }
-    .reveal-content {
-      position: absolute; inset: 0;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      padding: 2rem; text-align: center; background: var(--surface);
-    }
-    .reveal-cover {
-      position: absolute; inset: 0; background: var(--bg);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      z-index: 10; touch-action: none; cursor: grab;
-    }
     h1 { font-family: var(--font); font-size: 2.8rem; color: var(--accent); letter-spacing: -1px; line-height: 1.1; }
     h2 { font-family: var(--font); font-size: 1.4rem; color: var(--text); margin-bottom: 0.5rem; }
     .subtitle { color: var(--muted); font-size: 0.85rem; margin-bottom: 1.2rem; }
@@ -379,7 +369,7 @@
       <p class="swipe-hint" style="margin-top:0.3rem;font-size:0.75rem;color:#555">Suelta para tapar</p>
     </div>
   </div>
-  <button class="btn" id="btn-reveal-next" style="flex-shrink:0;border-radius:0;padding:1.1rem 1.5rem;font-size:1rem"></button>
+  <button class="btn" id="btn-reveal-next" style="flex-shrink:0;padding:1.1rem 1.5rem;font-size:1rem;border-radius:14px;margin:0.6rem 0.8rem 0.8rem"></button>
 </div>
 
 <!-- READY: todos han visto su rol + orden de turno -->
@@ -613,6 +603,13 @@ const MSGS_CAUGHT = [
   ['👁️','¡Te veíamos venir!','Imposible engañar a esta pandilla.'],
   ['🔦','¡Luz sobre el impostor!','No había donde esconderse.'],
   ['🎯','¡Diana!','El grupo acertó a la primera.'],
+  ['🧠','¡Mente colmena!','El grupo pensó junto y no falló.'],
+  ['🚨','¡Alarma activada!','El impostor no supo disimular.'],
+  ['🃏','¡Farol descubierto!','La cara de póker no fue suficiente.'],
+  ['🔍','¡Lupa en mano!','El grupo no dejó pasar ni un detalle.'],
+  ['⚖️','¡Justicia servida!','El jurado popular ha hablado.'],
+  ['🎤','¡Mic drop!','Una sola pista lo delató.'],
+  ['🐾','¡Siguiendo el rastro!','Dejaste demasiadas pistas por el camino.'],
 ];
 const MSGS_IMPOSTOR_WINS = [
   ['😈','El impostor desaparece','Demasiado listo para vosotros.'],
@@ -620,12 +617,27 @@ const MSGS_IMPOSTOR_WINS = [
   ['🌑','La oscuridad gana','El impostor se funde con las sombras.'],
   ['🎭','Actuación perfecta','Óscar al mejor actor: el impostor.'],
   ['🐍','Serpiente en el grupo','Siempre estuvo entre vosotros.'],
+  ['🦊','El zorro en el gallinero','Os tuvo a todos comiendo de su mano.'],
+  ['🌫️','Desvanecido en el aire','Como si nunca hubiera estado ahí.'],
+  ['🎪','El gran show','Os entretuvo mientras ganaba.'],
+  ['🧊','Sangre fría','Ni un parpadeo, ni un error.'],
+  ['👻','Intocable','El impostor fue fantasma hasta el final.'],
+  ['🎩','Truco de magia','Ahora lo ves, ahora no lo ves.'],
+  ['🗡️','Golpe maestro','Cayeron uno a uno sin enterarse.'],
 ];
 const MSGS_WRONG_VOTE = [
-  ['😬','¡Fallasteis!','no era el impostor.'],
-  ['🤦','¡Error de manual!','era inocente. El impostor sonríe.'],
-  ['💀','Víctima inocente','acusado sin pruebas.'],
-  ['🙈','¡Fiasco total!','era uno de los vuestros.'],
+  ['😬','¡Fallasteis!',' no era el impostor y queda eliminado/a.'],
+  ['🤦','¡Error de manual!',' era inocente. El impostor sonríe.'],
+  ['💀','Víctima inocente',' cae sin haber hecho nada.'],
+  ['🙈','¡Fiasco total!',' era uno de los vuestros.'],
+  ['🎭','Drama innecesario',' se va a casa sin culpa alguna.'],
+  ['🤡','Acusación payasa',' El verdadero impostor os está mirando.'],
+  ['😂','El impostor se parte',' Otro inocente cae por el camino.'],
+  ['🎲','Mala tirada',' la suerte no estuvo de vuestro lado.'],
+  ['🕳️','Agujero en el plan',' cayó el inocente, sigue el culpable.'],
+  ['🧩','Pieza equivocada',' el puzzle sigue sin resolverse.'],
+  ['🫣','¡Qué vergüenza!',' no tenía nada que ver con esto.'],
+  ['🎯','Puntería de trapo',' acertasteis a quien no era.'],
 ];
 function pick(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
 
@@ -651,7 +663,6 @@ function playTone(freq, type, duration, vol=0.3) {
 }
 function vibrate(pattern) { try { navigator.vibrate && navigator.vibrate(pattern); } catch(e){} }
 function soundReveal()  { playTone(440,'sine',0.15); setTimeout(()=>playTone(660,'sine',0.2),120); }
-function soundImpostor(){ vibrate([100,50,200]); playTone(200,'sawtooth',0.4,0.4); setTimeout(()=>playTone(150,'sawtooth',0.5,0.4),300); }
 function soundSuccess() { vibrate([50,30,50]); [523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,'sine',0.25),i*100)); }
 function soundFail()    { vibrate([200,100,200]); playTone(300,'square',0.2,0.35); setTimeout(()=>playTone(220,'square',0.3,0.35),200); }
 function soundPass()    { playTone(330,'sine',0.1,0.2); }
@@ -663,7 +674,8 @@ let currentRevealIdx=0, voteSelected=null, round=1;
 let difficulty='none', selectedCategory='Todo';
 let scores={};
 let turnOrder=[];
-let usedWords={}; // clave: 'categoria' o 'football', valor: Set de palabras usadas
+let usedWords={};
+let gameSource='random'; // 'random' | 'custom'
 
 // ── NAVEGACIÓN ────────────────────────────────────────────────────
 function goTo(id) {
@@ -783,6 +795,7 @@ function pickFootballer() {
 }
 
 function startGame() {
+  gameSource = 'random';
   if (gameMode==='football') {
     gameWord = pickFootballer();
     gameHint = '';
@@ -801,6 +814,7 @@ function startGameCustom() {
   const h = document.getElementById('custom-hint').value.trim();
   if (!w) { alert('Escribe la palabra secreta'); return; }
   if (difficulty !== 'none' && !h) { alert('Escribe la pista'); return; }
+  gameSource = 'custom';
   gameWord = w; gameHint = h;
   launchGame();
 }
@@ -866,9 +880,6 @@ function setupReveal() {
   function onStart(y) {
     startY=y; dragging=true; played=false;
     cover.style.transition = 'none';
-    if (activePlayers[currentRevealIdx] === impostorName) {
-      setTimeout(soundImpostor, 350);
-    }
   }
   function onMove(y) {
     if (!dragging) return;
@@ -953,11 +964,11 @@ function confirmVote() {
 
   } else {
     soundFail();
-    const [icon, title] = pick(MSGS_WRONG_VOTE);
+    const [icon, title, title2] = pick(MSGS_WRONG_VOTE);
     document.getElementById('elim-icon').textContent = icon;
     document.getElementById('elim-title').textContent = title;
     document.getElementById('elim-name').textContent = votedName;
-    document.getElementById('elim-msg').textContent = ' no era el impostor y queda eliminado/a.';
+    document.getElementById('elim-msg').textContent = title2;
     activePlayers.splice(voteSelected, 1);
 
     if (activePlayers.length <= 2 && activePlayers.includes(impostorName)) {
@@ -984,9 +995,12 @@ function confirmVote() {
 function nextRound() { round++; setupDebate(); }
 
 // ── ADIVINAR ──────────────────────────────────────────────────────
+function normalize(str) {
+  return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
 function checkGuess() {
-  const guess = document.getElementById('guess-input').value.trim().toLowerCase();
-  const correct = guess === gameWord.toLowerCase();
+  const guess = document.getElementById('guess-input').value.trim();
+  const correct = normalize(guess) === normalize(gameWord);
   document.getElementById('guess-section').style.display = 'none';
   const label = gameMode==='football' ? `el futbolista "${gameWord}"` : `la palabra "${gameWord}"`;
 
@@ -1010,14 +1024,20 @@ function checkGuess() {
 
 // ── REPETIR ────────────────────────────────────────────────────────
 function repeatGame() {
-  // Relanza con los mismos jugadores, modo, categoría y dificultad — nueva palabra, nuevo impostor
-  launchGame();
+  // Si la partida fue personalizada, repite con la misma palabra y pista
+  // Si fue aleatoria, coge una nueva (sin repetición)
+  if (gameSource === 'custom') {
+    launchGame(); // gameWord y gameHint ya están guardados
+  } else {
+    startGame(); // nueva palabra del banco, misma categoría y dificultad
+  }
 }
 
 function playAgainSamePlayers() {
   document.getElementById('custom-word').value = '';
   document.getElementById('custom-hint').value = '';
   document.body.classList.remove('football-bg');
+  renderPlayerTags();
   goTo('screen-players');
 }
 
