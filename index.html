@@ -350,6 +350,52 @@
     .football-mode input:focus, .football-mode select:focus { border-color: var(--accent-football); }
     .football-mode .score-item.leader { border-color: var(--accent-football); background: rgba(76,175,125,0.06); }
     .football-mode .score-item .score-pts { color: var(--accent-football); }
+    /* ── VOTACIÓN MEJORADA ── */
+    #screen-vote { position: relative; overflow: hidden; }
+    #vote-bg {
+      position: absolute; inset: 0; pointer-events: none; z-index: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(232,123,71,0.07) 0%, transparent 60%);
+    }
+    #screen-vote > *:not(#vote-bg) { position: relative; z-index: 1; }
+    #screen-vote h2 { font-size: 1.9rem; text-align: center; }
+    .vote-active-count {
+      font-size: 0.75rem; color: var(--muted); text-transform: uppercase;
+      letter-spacing: 1px; text-align: center; margin-bottom: 0.3rem;
+    }
+    .eliminated-list {
+      display: flex; flex-wrap: wrap; gap: 0.4rem;
+      justify-content: center; margin-bottom: 0.6rem; min-height: 0;
+    }
+    .eliminated-tag {
+      font-size: 0.75rem; color: var(--muted); background: var(--card);
+      border: 1px solid var(--border); border-radius: 20px;
+      padding: 0.2rem 0.6rem; text-decoration: line-through; opacity: 0.55;
+    }
+    .vote-btn {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 1rem 1.2rem; color: var(--text); font-size: 1rem; cursor: pointer;
+      text-align: center; font-family: var(--font); width: 100%;
+      transition: border-color 0.15s, background 0.15s, transform 0.1s;
+      letter-spacing: 0.2px;
+    }
+    .vote-btn:active { transform: scale(0.98); }
+    .vote-btn.selected { border-color: var(--accent2); background: rgba(232,123,71,0.1); color: var(--accent2); font-weight: 600; }
+
+    /* ── ANIMACIÓN TAGS JUGADORES ── */
+    .tag { animation: tagPop 0.25s cubic-bezier(0.175,0.885,0.32,1.275) both; }
+    @keyframes tagPop {
+      from { opacity: 0; transform: scale(0.6); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    /* ── RULES Y SCORES CON MÁS PERSONALIDAD ── */
+    #screen-rules h2, #screen-scores h2 { font-size: 2rem; margin-bottom: 0.2rem; }
+    #screen-rules p {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 0.9rem 1rem;
+      font-size: 0.9rem; line-height: 1.7; color: var(--text);
+    }
+
     #offline-toast {
       display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
       background: #2a2a2a; border-bottom: 1px solid rgba(232,123,71,0.4);
@@ -493,6 +539,7 @@
 
 <!-- HOME -->
 <div id="screen-home" class="screen active">
+  <button id="btn-mute" onclick="toggleMusic()" style="position:absolute;top:1.2rem;right:1.2rem;z-index:10;background:transparent;border:none;font-size:1.4rem;cursor:pointer;opacity:0.55;padding:0.3rem">🔊</button>
   <div id="home-bg">
     <div class="home-shadow s1"></div>
     <div class="home-shadow s2"></div>
@@ -516,9 +563,11 @@
 <div id="screen-rules" class="screen" style="gap:0.8rem">
   <h2>Cómo se juega</h2>
   <p class="subtitle">El juego de las palabras y la desconfianza</p>
-  <p style="font-size:0.95rem;line-height:1.7"><strong>Modo clásico:</strong> todos reciben la misma palabra secreta, excepto el impostor, que recibe una pista.</p>
-  <p style="font-size:0.95rem;line-height:1.7"><strong>Modo fútbol:</strong> todos reciben el nombre de un futbolista famoso, excepto el impostor, que solo sabe que es el impostor.</p>
-  <p style="font-size:0.95rem;line-height:1.7">Cada uno dice algo relacionado con su palabra. El grupo debate y vota. Si fallan, ese jugador queda eliminado y se vota de nuevo. El impostor gana si llega a quedar solo con otro jugador.</p>
+  <p><strong>Modo clásico:</strong> todos reciben la misma palabra secreta, excepto el impostor, que recibe una pista según la dificultad elegida.</p>
+  <p style="margin-top:0.5rem"><strong>Modo fútbol:</strong> todos reciben el nombre de un futbolista famoso. El impostor no recibe nada — solo sabe que lo es.</p>
+  <p style="margin-top:0.5rem"><strong>El debate:</strong> cada jugador dice algo relacionado con su palabra sin revelarla. El grupo debate y vota quién cree que es el impostor.</p>
+  <p style="margin-top:0.5rem"><strong>Si fallan:</strong> el votado queda eliminado y se juega otra ronda con los que quedan.</p>
+  <p style="margin-top:0.5rem"><strong>El impostor gana</strong> si los impostores igualan o superan a los jugadores normales. <strong>Los jugadores ganan</strong> si lo descubren — aunque el impostor puede salvarse adivinando la palabra.</p>
   <div class="gap"></div>
   <button class="btn" onclick="goTo('screen-home')">Volver</button>
 </div>
@@ -666,13 +715,15 @@
 </div>
 
 <!-- VOTE -->
-<div id="screen-vote" class="screen" style="gap:0.8rem">
+<div id="screen-vote" class="screen" style="gap:0.7rem">
+  <div id="vote-bg"></div>
   <div class="step-indicator" id="vote-round-label">RONDA 1 · VOTACIÓN</div>
   <h2>¿Quién es el impostor?</h2>
-  <p class="subtitle">Vota a quién quieres eliminar</p>
+  <p class="vote-active-count" id="vote-active-count"></p>
+  <div class="eliminated-list" id="vote-eliminated-list"></div>
   <div class="player-vote-list" id="vote-list"></div>
   <div class="gap"></div>
-  <button class="btn" id="btn-vote" onclick="confirmVote()" disabled>Confirmar voto</button>
+  <button class="btn" id="btn-vote" onclick="confirmVote()" disabled>Confirmar voto →</button>
 </div>
 
 <!-- ELIMINATED -->
@@ -915,6 +966,8 @@ function pick(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
 
 // ── AUDIO ─────────────────────────────────────────────────────────
 let audioCtx = null;
+let musicMuted = false;
+let musicNodes = null;
 
 function getCtx() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -991,11 +1044,100 @@ function soundPass() {
   playTone(440, 'sine', 0.08, 0.15);
 }
 
-// ── Música ambiental desactivada ──
-function startAmbientMusic() {}
-function stopAmbientMusic() {}
-function toggleMusic() {}
-function loadMutePreference() {}
+// ── Música sinuosa de misterio (home + modos) ──
+const MYSTERY_MELODY = [
+  // [freq, duración en ms] — escala menor con notas cromáticas
+  [220, 900],[247, 700],[233, 1100],[196, 800],
+  [208, 600],[220, 1000],[196, 900],[175, 1200],
+  [185, 800],[196, 700],[220, 1000],[208, 900],
+  [233, 1100],[220, 800],[196, 700],[175, 1500],
+];
+let melodyTimer = null;
+let melodyIdx = 0;
+
+function playMelodyNote(freq, duration) {
+  if (musicMuted || !musicNodes) return;
+  try {
+    const ctx = getCtx();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    const reverb = ctx.createConvolver();
+
+    o.type = 'sine';
+    o.frequency.setValueAtTime(freq, ctx.currentTime);
+    // Vibrato sutil
+    const vibrato = ctx.createOscillator();
+    const vibratoGain = ctx.createGain();
+    vibrato.frequency.value = 4.5;
+    vibratoGain.gain.value = 1.8;
+    vibrato.connect(vibratoGain);
+    vibratoGain.connect(o.frequency);
+    vibrato.start();
+
+    const dur = duration / 1000;
+    g.gain.setValueAtTime(0, ctx.currentTime);
+    g.gain.linearRampToValueAtTime(0.07, ctx.currentTime + dur * 0.15);
+    g.gain.setValueAtTime(0.07, ctx.currentTime + dur * 0.6);
+    g.gain.linearRampToValueAtTime(0, ctx.currentTime + dur * 0.98);
+
+    o.connect(g); g.connect(ctx.destination);
+    o.start(); o.stop(ctx.currentTime + dur);
+    vibrato.stop(ctx.currentTime + dur);
+  } catch(e) {}
+}
+
+function scheduleMelody() {
+  if (musicMuted || !musicNodes) return;
+  const [freq, dur] = MYSTERY_MELODY[melodyIdx];
+  playMelodyNote(freq, dur);
+  melodyIdx = (melodyIdx + 1) % MYSTERY_MELODY.length;
+  // Usar AudioContext.currentTime para evitar deriva acumulada en sesiones largas
+  const gap = dur + Math.floor(Math.random() * 300) + 100;
+  melodyTimer = setTimeout(scheduleMelody, gap);
+}
+
+function startAmbientMusic() {
+  if (musicMuted || musicNodes) return;
+  try {
+    const ctx = getCtx();
+    // Drone grave muy tenue de fondo
+    const drone = ctx.createOscillator();
+    const droneGain = ctx.createGain();
+    drone.type = 'sine';
+    drone.frequency.value = 55;
+    droneGain.gain.setValueAtTime(0, ctx.currentTime);
+    droneGain.gain.linearRampToValueAtTime(0.025, ctx.currentTime + 3);
+    drone.connect(droneGain); droneGain.connect(ctx.destination);
+    drone.start();
+    musicNodes = { drone, droneGain };
+    // Melodía empieza tras una pequeña pausa
+    melodyTimer = setTimeout(scheduleMelody, 1200);
+  } catch(e) {}
+}
+
+function stopAmbientMusic() {
+  if (!musicNodes) return;
+  if (melodyTimer) { clearTimeout(melodyTimer); melodyTimer = null; }
+  try {
+    const ctx = getCtx();
+    const { droneGain, drone } = musicNodes;
+    droneGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 1);
+    setTimeout(() => { try { drone.stop(); } catch(e) {} musicNodes = null; }, 1100);
+  } catch(e) { musicNodes = null; }
+}
+
+function toggleMusic() {
+  musicMuted = !musicMuted;
+  const btn = document.getElementById('btn-mute');
+  if (btn) btn.textContent = musicMuted ? '🔇' : '🔊';
+  if (musicMuted) { stopAmbientMusic(); }
+  else { startAmbientMusic(); }
+  try { localStorage.setItem('impostor_muted', musicMuted ? '1' : '0'); } catch(e) {}
+}
+
+function loadMutePreference() {
+  try { musicMuted = localStorage.getItem('impostor_muted') === '1'; } catch(e) {}
+}
 
 // ── ANALYTICS ────────────────────────────────────────────────────
 function gaEvent(name, params) {
@@ -1018,6 +1160,13 @@ function goTo(id) {
   document.querySelectorAll('.screen, #screen-reveal').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo(0, 0);
+  if (id === 'screen-home' || id === 'screen-mode') {
+    startAmbientMusic();
+    const btn = document.getElementById('btn-mute');
+    if (btn) btn.textContent = musicMuted ? '🔇' : '🔊';
+  } else {
+    stopAmbientMusic();
+  }
 }
 
 // ── HISTORIAL PALABRAS PERSONALIZADAS ─────────────────────────────
@@ -1636,6 +1785,17 @@ function toggleDebateOrder() {
 // ── VOTE ──────────────────────────────────────────────────────────
 function setupVote() {
   document.getElementById('vote-round-label').textContent = `RONDA ${round} · VOTACIÓN`;
+  // Jugadores activos y eliminados
+  const eliminated = allPlayers.filter(p => !activePlayers.includes(p));
+  document.getElementById('vote-active-count').textContent =
+    `${activePlayers.length} jugador${activePlayers.length!==1?'es':''} en juego`;
+  const elimList = document.getElementById('vote-eliminated-list');
+  if (eliminated.length > 0) {
+    elimList.innerHTML = eliminated.map(p => `<span class="eliminated-tag">❌ ${p}</span>`).join('');
+    elimList.style.display = 'flex';
+  } else {
+    elimList.style.display = 'none';
+  }
   document.getElementById('vote-list').innerHTML = activePlayers.map((p,i) =>
     `<button class="vote-btn" onclick="selectVote(${i},this)">${p}</button>`
   ).join('');
@@ -1819,6 +1979,7 @@ function repeatGame() {
 function playAgainSamePlayers() {
   document.getElementById('custom-word').value = '';
   document.getElementById('custom-hint').value = '';
+  document.getElementById('player-input').value = '';
   document.body.classList.remove('football-bg', 'football-mode');
   document.getElementById('players-mode-badge').innerHTML = gameMode==='football'
     ? '<span class="mode-badge football">⚽ Modo fútbol</span>'
@@ -1897,6 +2058,13 @@ loadMutePreference();
 buildCategorySelect();
 animateHomeLetters();
 startTaglineRotation();
+// Arrancar música en home al cargar (requiere interacción previa del usuario en iOS)
+const muteBtn = document.getElementById('btn-mute');
+if (muteBtn) muteBtn.textContent = musicMuted ? '🔇' : '🔊';
+document.addEventListener('click', function initMusic() {
+  startAmbientMusic();
+  document.removeEventListener('click', initMusic);
+}, { once: true });
 document.getElementById('btn-to-players').addEventListener('click', goToPlayers);
 document.getElementById('btn-go-vote').addEventListener('click', setupVote);
 document.getElementById('btn-scores').addEventListener('click', () => { renderScores(); goTo('screen-scores'); });
