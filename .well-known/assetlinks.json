@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.omartinezr.elimpostor",
+        "sha256_cert_fingerprints": ["D8:A6:C2:06:1E:48:44:52:98:4D:A5:A2:03:7E:36:79:87:B5:82:18:01:B2:99:5E:F3:18:9C:F2:91:DF:E8:8E"]
+      }
+    }]
