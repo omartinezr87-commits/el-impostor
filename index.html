@@ -10,6 +10,22 @@
   <meta name="application-name" content="El Impostor">
   <meta name="msapplication-TileColor" content="#0f0f0f">
   <meta name="theme-color" content="#0f0f0f">
+  <meta name="description" content="El Impostor — un juego social de palabras, pistas y desconfianza para grupos de 3 o más personas. Modo clásico y modo fútbol.">
+
+  <!-- Open Graph / Facebook / WhatsApp -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://el-impostor-two-phi.vercel.app/">
+  <meta property="og:title" content="El Impostor">
+  <meta property="og:description" content="El juego de palabras, pistas y desconfianza. ¿En quién confías?">
+  <meta property="og:image" content="https://el-impostor-two-phi.vercel.app/icon-512.png">
+  <meta property="og:locale" content="es_ES">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="El Impostor">
+  <meta name="twitter:description" content="El juego de palabras, pistas y desconfianza. ¿En quién confías?">
+  <meta name="twitter:image" content="https://el-impostor-two-phi.vercel.app/icon-512.png">
+
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -88,6 +104,34 @@
     @keyframes photoFadeIn {
       from { opacity: 0; transform: scale(0.92); }
       to   { opacity: 1; transform: scale(1); }
+    }
+
+    /* ── ADAPTACIÓN A PANTALLAS ── */
+    /* Pantallas muy pequeñas (iPhone SE, 320-360px) */
+    @media (max-width: 360px) {
+      .screen { padding: 1rem; padding-bottom: 1.5rem; }
+      h1 { font-size: 2.2rem; }
+      h2 { font-size: 1.2rem; }
+      .btn { padding: 0.8rem 1.2rem; font-size: 0.95rem; }
+      .role-word { font-size: 2.2rem; }
+      .role-word.impostor-word { font-size: 1.9rem; }
+      .player-badge .player-name { font-size: 1.7rem; }
+      #debate-round { font-size: 2.4rem; }
+      #screen-debate h2 { font-size: 1.5rem; }
+      .result-icon { font-size: 3rem; }
+      .result-title { font-size: 1.7rem; }
+      .elim-title { font-size: 1.5rem; }
+    }
+    /* Tablets y pantallas grandes — limitar ancho para que no se vea estirado */
+    @media (min-width: 600px) {
+      .screen { max-width: 560px; margin: 0 auto; }
+      #screen-home .home-content { max-width: 560px; margin: 0 auto; }
+      #screen-reveal .reveal-zone { max-width: 560px; margin: 0 auto; width: 100%; }
+    }
+    /* Pantallas muy grandes */
+    @media (min-width: 900px) {
+      body { background: #050505; }
+      .screen { background: var(--bg); border-radius: 0; }
     }
 
     /* FONDO CAMPO FÚTBOL */
@@ -611,7 +655,7 @@
 
 <!-- HOME -->
 <div id="screen-home" class="screen active">
-  <button id="btn-mute" onclick="toggleMusic()" style="position:absolute;top:1.2rem;right:1.2rem;z-index:10;background:transparent;border:none;font-size:1.4rem;cursor:pointer;opacity:0.55;padding:0.3rem">🔊</button>
+  <button id="btn-mute" onclick="toggleMusic()" aria-label="Activar o desactivar música" style="position:absolute;top:1.2rem;right:1.2rem;z-index:10;background:transparent;border:none;font-size:1.4rem;cursor:pointer;opacity:0.55;padding:0.3rem">🔊</button>
   <div id="home-bg">
     <div class="home-shadow s1"></div>
     <div class="home-shadow s2"></div>
@@ -674,7 +718,7 @@
   <div id="classic-options" style="display:none">
     <p class="section-label">Categoría</p>
     <div class="select-wrap">
-      <select id="category-select"></select>
+      <select id="category-select" aria-label="Selecciona una categoría"></select>
     </div>
     <p class="section-label">Dificultad del impostor</p>
     <div class="diff-pills">
@@ -695,7 +739,7 @@
   <h2>¿Quién juega?</h2>
   <p class="subtitle">Añade al menos 3 jugadores</p>
   <div style="display:flex;gap:0.5rem">
-    <input type="text" id="player-input" placeholder="Nombre del jugador" maxlength="20" onkeydown="if(event.key==='Enter')addPlayer()">
+    <input type="text" id="player-input" placeholder="Nombre del jugador" aria-label="Nombre del jugador" maxlength="20" onkeydown="if(event.key==='Enter')addPlayer()">
     <button class="btn" style="width:auto;padding:0.75rem 1rem;flex-shrink:0" onclick="addPlayer()">+</button>
   </div>
   <div class="tag-list" id="player-tags"></div>
@@ -718,8 +762,8 @@
   <div class="info-box">
     Esta pantalla es para <strong>alguien que no va a jugar</strong>. Introduce la palabra y la pista según la dificultad elegida.
   </div>
-  <input type="text" id="custom-word" placeholder="Palabra secreta (ej: Pizza)" maxlength="30">
-  <input type="text" id="custom-hint" placeholder="Pista para el impostor" maxlength="40" style="margin-top:0.5rem">
+  <input type="text" id="custom-word" placeholder="Palabra secreta (ej: Pizza)" aria-label="Palabra secreta" maxlength="30">
+  <input type="text" id="custom-hint" placeholder="Pista para el impostor" aria-label="Pista para el impostor" maxlength="40" style="margin-top:0.5rem">
   <div id="custom-history-wrap" style="display:none;margin-top:0.4rem">
     <p class="section-label">Usadas recientemente</p>
     <div id="custom-history-list" style="display:flex;flex-direction:column;gap:0.4rem"></div>
@@ -831,7 +875,7 @@
     <hr class="divider">
     <p style="font-size:0.9rem;color:var(--text);margin-bottom:0.8rem" id="guess-label"></p>
     <div class="guess-section">
-      <input type="text" id="guess-input" placeholder="¿Cuál crees que es?">
+      <input type="text" id="guess-input" placeholder="¿Cuál crees que es?" aria-label="Introduce tu intento de adivinanza">
       <button class="btn" onclick="checkGuess()">Adivinar</button>
     </div>
   </div>
@@ -876,6 +920,14 @@ const CATEGORIES = {
     {w:'Surfista',h1:'Olas',h2:'Deportista acuático'},{w:'Brujo',h1:'Magia',h2:'Hechicero malvado'},
     {w:'Astronauta',h1:'Espacio',h2:'Viajero espacial'},{w:'Terremoto',h1:'Suelo',h2:'Movimiento sísmico'},
     {w:'Submarinista',h1:'Buceo',h2:'Explorador marino'},{w:'Lobo',h1:'Manada',h2:'Cánido salvaje'},
+    {w:'Jirafa',h1:'Cuello',h2:'Mamífero alto'},{w:'Payaso',h1:'Circo',h2:'Artista cómico'},
+    {w:'Karaoke',h1:'Canción',h2:'Cantar grabado'},{w:'Yoga',h1:'Meditación',h2:'Práctica de relajación'},
+    {w:'Tatuaje',h1:'Piel',h2:'Dibujo permanente'},{w:'Feria',h1:'Atracciones',h2:'Evento con juegos'},
+    {w:'Mago',h1:'Trucos',h2:'Ilusionista'},{w:'Taxi',h1:'Ciudad',h2:'Coche de alquiler'},
+    {w:'Brújula',h1:'Norte',h2:'Guía magnética'},{w:'Detective',h1:'Crimen',h2:'Investigador privado'},
+    {w:'Karate',h1:'Cinturón',h2:'Arte marcial'},{w:'Pistola',h1:'Arma',h2:'Arma corta'},
+    {w:'Reloj',h1:'Tiempo',h2:'Mide las horas'},{w:'Paracaídas',h1:'Caída',h2:'Aparato de aterrizaje'},
+    {w:'Yate',h1:'Lujo',h2:'Barco de recreo'},{w:'Laberinto',h1:'Perdido',h2:'Camino complicado'},
   ],
   'Comida': [
     {w:'Pizza',h1:'Italiana',h2:'Masa con tomate'},{w:'Sushi',h1:'Japonés',h2:'Arroz con pescado'},
@@ -893,6 +945,13 @@ const CATEGORIES = {
     {w:'Macarrón',h1:'Pasta',h2:'Tubo de harina'},{w:'Nachos',h1:'México',h2:'Chips con queso'},
     {w:'Ostras',h1:'Mar',h2:'Molusco con concha'},{w:'Risotto',h1:'Arroz',h2:'Plato italiano cremoso'},
     {w:'Steak',h1:'Carne',h2:'Filete a la plancha'},{w:'Wasabi',h1:'Picante',h2:'Pasta verde japonesa'},
+    {w:'Empanada',h1:'Argentina',h2:'Masa rellena horneada'},{w:'Falafel',h1:'Árabe',h2:'Bolas de garbanzo'},
+    {w:'Kebab',h1:'Turco',h2:'Carne asada vertical'},{w:'Pho',h1:'Vietnam',h2:'Sopa con fideos'},
+    {w:'Bacon',h1:'Cerdo',h2:'Panceta ahumada'},{w:'Lasaña',h1:'Italia',h2:'Pasta con capas'},
+    {w:'Churros',h1:'Fritos',h2:'Masa alargada con chocolate'},{w:'Donut',h1:'Rosquilla',h2:'Bollo con agujero'},
+    {w:'Chorizo',h1:'Embutido',h2:'Carne picada con pimentón'},{w:'Nata',h1:'Lácteo',h2:'Crema de leche'},
+    {w:'Pimienta',h1:'Especia',h2:'Grano picante'},{w:'Canela',h1:'Especia',h2:'Corteza aromática'},
+    {w:'Mayonesa',h1:'Salsa',h2:'Crema de huevo y aceite'},{w:'Aguacate',h1:'Fruta',h2:'Fruta verde cremosa'},
   ],
   'Animales': [
     {w:'Tiburón',h1:'Mar',h2:'Depredador marino'},{w:'León',h1:'Selva',h2:'Felino africano'},
@@ -910,6 +969,12 @@ const CATEGORIES = {
     {w:'Pavo real',h1:'Plumas',h2:'Ave colorida'},{w:'Escorpión',h1:'Veneno',h2:'Arácnido con pinzas'},
     {w:'Nutria',h1:'Río',h2:'Mamífero acuático juguetón'},{w:'Leopardo',h1:'Manchas',h2:'Felino veloz'},
     {w:'Ballena',h1:'Océano',h2:'Mayor mamífero'},{w:'Cacatúa',h1:'Pico',h2:'Ave habladora'},
+    {w:'Pulpo',h1:'Tentáculos',h2:'Cefalópodo inteligente'},{w:'Koala',h1:'Eucalipto',h2:'Marsupial australiano'},
+    {w:'Perezoso',h1:'Lento',h2:'Mamífero arborícola'},{w:'Chimpancé',h1:'Primate',h2:'Simio inteligente'},
+    {w:'Tigre',h1:'Rayas',h2:'Felino rayado'},{w:'Zorro',h1:'Astuto',h2:'Cánido pequeño'},
+    {w:'Pantera',h1:'Negra',h2:'Felino salvaje'},{w:'Mapache',h1:'Máscara',h2:'Mamífero con antifaz'},
+    {w:'Búho',h1:'Noche',h2:'Ave rapaz nocturna'},{w:'Jabalí',h1:'Bosque',h2:'Cerdo salvaje'},
+    {w:'Calamar',h1:'Mar',h2:'Cefalópodo alargado'},{w:'Toro',h1:'Lidia',h2:'Bovino macho'},
   ],
   'Cine y TV': [
     {w:'Zombie',h1:'Muerto',h2:'No muerto hambriento'},{w:'Superhéroe',h1:'Poderes',h2:'Justicieros ficticios'},
@@ -927,6 +992,12 @@ const CATEGORIES = {
     {w:'Androide',h1:'Robot',h2:'Humanoide artificial'},{w:'Caballero',h1:'Espada',h2:'Guerrero medieval'},
     {w:'Samurái',h1:'Japón',h2:'Guerrero con katana'},{w:'Zombi',h1:'Apocalipsis',h2:'Muerto viviente'},
     {w:'Serial killer',h1:'Crimen',h2:'Asesino en serie'},{w:'Doble agente',h1:'Traición',h2:'Espía infiltrado'},
+    {w:'Cowboy',h1:'Far West',h2:'Vaquero americano'},{w:'Mafioso',h1:'Crimen',h2:'Miembro del crimen organizado'},
+    {w:'Policía',h1:'Ley',h2:'Agente del orden'},{w:'Bombero',h1:'Fuego',h2:'Apaga incendios'},
+    {w:'Científico',h1:'Laboratorio',h2:'Investigador loco'},{w:'Mad Max',h1:'Apocalipsis',h2:'Héroe postapocalíptico'},
+    {w:'Jedi',h1:'Sable',h2:'Guerrero espacial'},{w:'Mutante',h1:'Poderes',h2:'Humano alterado'},
+    {w:'Extraterrestre',h1:'OVNI',h2:'Ser de otro planeta'},{w:'Sirena',h1:'Mar',h2:'Mitad humana mitad pez'},
+    {w:'Dragón',h1:'Fuego',h2:'Criatura escamosa mítica'},{w:'Mago',h1:'Magia',h2:'Hechicero con varita'},
   ],
   'Música': [
     {w:'Guitarra',h1:'Cuerdas',h2:'Instrumento punteo'},{w:'Batería',h1:'Golpes',h2:'Instrumento percusión'},
@@ -944,6 +1015,12 @@ const CATEGORIES = {
     {w:'Solista',h1:'Solo',h2:'Músico individual'},{w:'Remix',h1:'Mezcla',h2:'Versión modificada'},
     {w:'Acústico',h1:'Natural',h2:'Sin amplificación'},{w:'Playlist',h1:'Lista',h2:'Selección de canciones'},
     {w:'Gira',h1:'Tour',h2:'Serie de conciertos'},{w:'Backstage',h1:'Bambalinas',h2:'Zona tras escenario'},
+    {w:'Rock',h1:'Eléctrico',h2:'Género musical potente'},{w:'Jazz',h1:'Improvisación',h2:'Género con swing'},
+    {w:'Reggaeton',h1:'Caribe',h2:'Ritmo latino urbano'},{w:'Auriculares',h1:'Oídos',h2:'Escuchar en privado'},
+    {w:'Partitura',h1:'Notas',h2:'Escritura musical'},{w:'Rapero',h1:'Rima',h2:'Artista de rap'},
+    {w:'Cantante',h1:'Voz',h2:'Artista vocal'},{w:'Banda',h1:'Grupo',h2:'Conjunto de músicos'},
+    {w:'Karaoke',h1:'Micrófono',h2:'Cantar con pantalla'},{w:'Beatbox',h1:'Boca',h2:'Percusión vocal'},
+    {w:'Coreografía',h1:'Baile',h2:'Secuencia de movimientos'},{w:'Albúm',h1:'Disco',h2:'Colección de canciones'},
   ],
   'Deporte': [
     {w:'Fútbol',h1:'Balón',h2:'Deporte rey'},{w:'Tenis',h1:'Raqueta',h2:'Deporte individual'},
@@ -961,6 +1038,12 @@ const CATEGORIES = {
     {w:'Patinaje',h1:'Hielo',h2:'Deslizamiento sobre hielo'},{w:'Tiro con arco',h1:'Flecha',h2:'Deporte precisión'},
     {w:'Pelota vasca',h1:'Frontón',h2:'Deporte tradicional'},{w:'Waterpolo',h1:'Piscina',h2:'Fútbol acuático'},
     {w:'Balonmano',h1:'Portería',h2:'Deporte de mano'},{w:'Squash',h1:'Raqueta',h2:'Deporte en sala cerrada'},
+    {w:'Maratón',h1:'Kilómetros',h2:'Carrera larga'},{w:'Pilates',h1:'Colchoneta',h2:'Ejercicio de control'},
+    {w:'Ajedrez',h1:'Tablero',h2:'Deporte mental'},{w:'Parkour',h1:'Ciudad',h2:'Saltos urbanos'},
+    {w:'Caza',h1:'Escopeta',h2:'Actividad al aire libre'},{w:'Pesca',h1:'Caña',h2:'Capturar peces'},
+    {w:'Snowboard',h1:'Nieve',h2:'Tabla en la nieve'},{w:'Skate',h1:'Tabla',h2:'Monopatín'},
+    {w:'Bailar',h1:'Música',h2:'Moverse al ritmo'},{w:'Gimnasia',h1:'Acrobacia',h2:'Ejercicios de destreza'},
+    {w:'Billar',h1:'Taco',h2:'Bolas sobre mesa'},{w:'Bolos',h1:'Pista',h2:'Derribar con bola'},
   ],
   'Lugares': [
     {w:'Playa',h1:'Arena',h2:'Costa arenosa'},{w:'Volcán',h1:'Lava',h2:'Montaña ígnea'},
@@ -978,6 +1061,12 @@ const CATEGORIES = {
     {w:'Mezquita',h1:'Islam',h2:'Templo musulmán'},{w:'Palacio',h1:'Rey',h2:'Residencia real'},
     {w:'Puerto',h1:'Barcos',h2:'Terminal marítima'},{w:'Mina',h1:'Subterráneo',h2:'Extracción mineral'},
     {w:'Glacier',h1:'Hielo',h2:'Masa de hielo enorme'},{w:'Pantano',h1:'Barro',h2:'Zona inundada'},
+    {w:'Hospital',h1:'Salud',h2:'Centro médico'},{w:'Escuela',h1:'Niños',h2:'Centro educativo'},
+    {w:'Cárcel',h1:'Presos',h2:'Centro penitenciario'},{w:'Museo',h1:'Arte',h2:'Edificio con obras'},
+    {w:'Gimnasio',h1:'Pesas',h2:'Lugar para entrenar'},{w:'Hotel',h1:'Hospedaje',h2:'Alojamiento temporal'},
+    {w:'Aldea',h1:'Rural',h2:'Pueblo pequeño'},{w:'Zoo',h1:'Animales',h2:'Recinto de fauna'},
+    {w:'Parque',h1:'Árboles',h2:'Espacio verde urbano'},{w:'Cine',h1:'Películas',h2:'Sala de proyección'},
+    {w:'Iglesia',h1:'Religión',h2:'Templo cristiano'},{w:'Restaurante',h1:'Comida',h2:'Local para comer'},
   ],
 };
 
@@ -994,6 +1083,25 @@ const PRESETS_FOOTBALL = [
   'Vidić','Terry','Lahm','Schweinsteiger','Müller','Klose','Ballack',
   'Seedorf','Davids','Vieira','Keane','Scholes','Rivaldo','Bebeto',
   'Zamorano','Salas','Batistuta','Valdés','Hierro','Redondo',
+  // Nuevos — leyendas y estrellas actuales
+  'Cruyff','Beckenbauer','Platini','Van Basten','Gullit','Rijkaard',
+  'Maldini','Baggio','Zanetti','Nesta','Thuram','Desailly',
+  'Ferdinand','Henry Larsson','Okocha','George Weah','Lineker',
+  'Stoichkov','Hagi','Raí','Carlos Valderrama','Pep Guardiola',
+  'Nuno Gomes','Deco','Quaresma','Pepe','Carvalho',
+  'Neuer','Kroos','Özil','Khedira','Podolski','Reus','Götze',
+  'Alonso','Villa','Torres','Fàbregas','Silva','Mata','Busquets',
+  'Jordi Alba','Sergio Busquets','Koke','Isco','Asensio',
+  'Vinicius','Rodrygo','Militão','Casemiro','Fabinho',
+  'Coutinho','Firmino','Alisson','Ederson','Marquinhos','Thiago Silva',
+  'Alexander-Arnold','Van Dijk','Kane','Son','Saka','Foden','Bellingham',
+  'Grealish','Sterling','Rashford','Vardy',
+  'Pedri','Gavi','Yamal','Nico Williams','Rodri','Lamine',
+  'Kvaratskhelia','Leão','Bruno Fernandes','Bernardo Silva',
+  'Vlahović','Lautaro Martínez','Di María','Dybala',
+  'Osimhen','Mané','Koulibaly','Mahrez','Hakimi','Ziyech',
+  'Son Heung-min','Kagawa','Minamino','Mitoma',
+  'Okafor','Musiala','Wirtz','Havertz','Gnabry',
 ];
 
 // ── MENSAJES VARIADOS ─────────────────────────────────────────────
@@ -1721,6 +1829,104 @@ const WIKI_TITLES = {
   "Xavi":               "Xavi",
   "Raúl":               "Raúl_(footballer)",
   "Guti":               "Guti_(footballer)",
+  // Nuevos
+  "Cruyff":             "Johan_Cruyff",
+  "Beckenbauer":        "Franz_Beckenbauer",
+  "Platini":            "Michel_Platini",
+  "Van Basten":         "Marco_van_Basten",
+  "Gullit":             "Ruud_Gullit",
+  "Rijkaard":           "Frank_Rijkaard",
+  "Maldini":            "Paolo_Maldini",
+  "Baggio":             "Roberto_Baggio",
+  "Zanetti":            "Javier_Zanetti",
+  "Nesta":              "Alessandro_Nesta",
+  "Thuram":             "Lilian_Thuram",
+  "Desailly":           "Marcel_Desailly",
+  "Ferdinand":          "Rio_Ferdinand",
+  "Henry Larsson":      "Henrik_Larsson",
+  "Okocha":             "Jay-Jay_Okocha",
+  "George Weah":        "George_Weah",
+  "Lineker":            "Gary_Lineker",
+  "Stoichkov":          "Hristo_Stoichkov",
+  "Hagi":               "Gheorghe_Hagi",
+  "Raí":                "Raí_(footballer)",
+  "Carlos Valderrama":  "Carlos_Valderrama",
+  "Pep Guardiola":      "Pep_Guardiola",
+  "Nuno Gomes":         "Nuno_Gomes",
+  "Deco":               "Deco",
+  "Quaresma":           "Ricardo_Quaresma",
+  "Pepe":               "Pepe_(footballer,_born_1983)",
+  "Carvalho":           "Ricardo_Carvalho",
+  "Neuer":              "Manuel_Neuer",
+  "Kroos":              "Toni_Kroos",
+  "Özil":               "Mesut_Özil",
+  "Khedira":            "Sami_Khedira",
+  "Podolski":           "Lukas_Podolski",
+  "Reus":               "Marco_Reus",
+  "Götze":              "Mario_Götze",
+  "Alonso":             "Xabi_Alonso",
+  "Villa":              "David_Villa",
+  "Torres":             "Fernando_Torres",
+  "Fàbregas":           "Cesc_Fàbregas",
+  "Silva":              "David_Silva",
+  "Mata":               "Juan_Mata",
+  "Busquets":           "Sergio_Busquets",
+  "Jordi Alba":         "Jordi_Alba",
+  "Sergio Busquets":    "Sergio_Busquets",
+  "Koke":               "Koke_(footballer,_born_1992)",
+  "Isco":               "Isco",
+  "Asensio":            "Marco_Asensio",
+  "Vinicius":           "Vinícius_Júnior",
+  "Rodrygo":            "Rodrygo",
+  "Militão":            "Éder_Militão",
+  "Casemiro":           "Casemiro",
+  "Fabinho":            "Fabinho_(footballer,_born_1993)",
+  "Coutinho":           "Philippe_Coutinho",
+  "Firmino":            "Roberto_Firmino",
+  "Alisson":            "Alisson",
+  "Ederson":            "Ederson_(footballer,_born_1993)",
+  "Marquinhos":         "Marquinhos",
+  "Thiago Silva":       "Thiago_Silva",
+  "Alexander-Arnold":   "Trent_Alexander-Arnold",
+  "Van Dijk":           "Virgil_van_Dijk",
+  "Kane":               "Harry_Kane",
+  "Son":                "Son_Heung-min",
+  "Son Heung-min":      "Son_Heung-min",
+  "Saka":               "Bukayo_Saka",
+  "Foden":              "Phil_Foden",
+  "Bellingham":         "Jude_Bellingham",
+  "Grealish":           "Jack_Grealish",
+  "Sterling":           "Raheem_Sterling",
+  "Rashford":           "Marcus_Rashford",
+  "Vardy":              "Jamie_Vardy",
+  "Pedri":              "Pedri",
+  "Gavi":               "Gavi_(footballer)",
+  "Yamal":              "Lamine_Yamal",
+  "Lamine":             "Lamine_Yamal",
+  "Nico Williams":      "Nico_Williams",
+  "Rodri":              "Rodri",
+  "Kvaratskhelia":      "Khvicha_Kvaratskhelia",
+  "Leão":               "Rafael_Leão",
+  "Bruno Fernandes":    "Bruno_Fernandes",
+  "Bernardo Silva":     "Bernardo_Silva",
+  "Vlahović":           "Dušan_Vlahović",
+  "Lautaro Martínez":   "Lautaro_Martínez",
+  "Di María":           "Ángel_Di_María",
+  "Dybala":             "Paulo_Dybala",
+  "Osimhen":            "Victor_Osimhen",
+  "Mané":               "Sadio_Mané",
+  "Koulibaly":          "Kalidou_Koulibaly",
+  "Mahrez":             "Riyad_Mahrez",
+  "Hakimi":             "Achraf_Hakimi",
+  "Ziyech":             "Hakim_Ziyech",
+  "Kagawa":             "Shinji_Kagawa",
+  "Minamino":           "Takumi_Minamino",
+  "Mitoma":             "Kaoru_Mitoma",
+  "Okafor":             "Noah_Okafor",
+  "Musiala":            "Jamal_Musiala",
+  "Wirtz":              "Florian_Wirtz",
+  "Havertz":            "Kai_Havertz",
+  "Gnabry":             "Serge_Gnabry",
 };
 
 async function fetchFootballerPhoto(name) {
