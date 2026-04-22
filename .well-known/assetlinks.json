@@ -3,6 +3,6 @@
       "target": {
         "namespace": "android_app",
         "package_name": "com.elimpostor",
-        "sha256_cert_fingerprints": ["29:D6:BD:57:EE:C0:B0:0D:DE:50:2F:7B:CB:6C:04:AB:B3:D5:C0:65:0D:FA:56:2A:CD:29:6C:C1:54:99:0A:C2"]
+        "sha256_cert_fingerprints": ["D8:A6:C2:06:1E:48:44:52:98:4D:A5:A2:03:7E:36:79:87:B5:82:18:01:B2:99:5E:F3:18:9C:F2:91:DF:E8:8E"]
       }
     }]
