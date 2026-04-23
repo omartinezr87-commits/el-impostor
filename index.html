@@ -181,6 +181,9 @@
       -webkit-appearance: none; appearance: none;
     }
     input:focus, select:focus { border-color: var(--accent); }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+    button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .football-mode :focus-visible, .football-mode button:focus-visible { outline-color: var(--accent-football); }
 
     .tag {
       display: inline-flex; align-items: center; background: var(--card);
@@ -662,11 +665,11 @@
     <div class="home-shadow s3"></div>
   </div>
   <div class="home-content">
-    <img src="icon-512.png" id="home-icon" alt="El Impostor">
+    <img src="icon-192.png" id="home-icon" alt="El Impostor" width="192" height="192">
     <h1 id="home-title"><span class="home-letter">E</span><span class="home-letter">l</span><span class="home-letter-space"> </span><span class="home-letter">I</span><span class="home-letter">m</span><span class="home-letter">p</span><span class="home-letter">o</span><span class="home-letter">s</span><span class="home-letter">t</span><span class="home-letter">o</span><span class="home-letter">r</span></h1>
     <p id="home-tagline" class="home-tagline"></p>
     <div class="home-buttons">
-      <button class="btn home-btn-main" onclick="goTo('screen-mode')">Nueva partida</button>
+      <button class="btn home-btn-main" onclick="goTo('screen-mode')" aria-label="Iniciar nueva partida">Nueva partida</button>
       <div class="home-btn-row">
         <button class="btn secondary home-btn-sec" id="btn-scores">Puntuaciones</button>
         <button class="btn secondary home-btn-sec" onclick="goTo('screen-rules')">Reglas</button>
@@ -695,7 +698,7 @@
   <p class="subtitle">Acumulado de todas las partidas</p>
   <div class="score-list" id="score-list"></div>
   <div class="gap"></div>
-  <button class="btn secondary" onclick="resetScores()">Reiniciar puntuaciones</button>
+  <button class="btn secondary" onclick="resetScores()" aria-label="Reiniciar todas las puntuaciones">Reiniciar puntuaciones</button>
   <button class="btn secondary" onclick="goTo('screen-home')" style="margin-top:0.4rem">Volver</button>
 </div>
 
@@ -728,7 +731,7 @@
     </div>
   </div>
   <div class="gap"></div>
-  <button class="btn" id="btn-to-players" disabled>Siguiente →</button>
+  <button class="btn" id="btn-to-players" aria-label="Ir a selección de jugadores" disabled>Siguiente →</button>
   <button class="btn secondary" onclick="goHome()">← Inicio</button>
 </div>
 
@@ -748,7 +751,7 @@
     <div id="impostor-count-pills" class="diff-pills" style="flex-wrap:wrap"></div>
   </div>
   <div class="gap"></div>
-  <button class="btn" id="btn-start-random" onclick="startGame()" disabled>Empezar partida</button>
+  <button class="btn" id="btn-start-random" onclick="startGame()" aria-label="Empezar partida con palabras aleatorias" disabled>Empezar partida</button>
   <div id="custom-word-btn-wrap">
     <button class="btn secondary" id="btn-custom-word" onclick="goToCustom()" disabled style="margin-top:0.4rem">Configurar palabra (alguien externo)</button>
   </div>
@@ -807,7 +810,7 @@
   <p>Este es el orden en que habla cada jugador:</p>
   <div id="turn-order-list" style="display:flex;flex-direction:column;gap:0.5rem;margin-top:0.2rem"></div>
   <div class="gap"></div>
-  <button class="btn" onclick="setupDebate()">Empezar debate →</button>
+  <button class="btn" onclick="setupDebate()" aria-label="Empezar la ronda de debate">Empezar debate →</button>
 </div>
 
 <!-- DEBATE -->
@@ -828,7 +831,7 @@
     <div id="debate-turn-order" style="display:flex;flex-direction:column;gap:0.5rem"></div>
   </div>
   <div class="gap"></div>
-  <button class="btn" id="btn-go-vote">Votar →</button>
+  <button class="btn" id="btn-go-vote" aria-label="Ir a la votación">Votar →</button>
 </div>
 
 <!-- VOTE -->
@@ -840,7 +843,7 @@
   <div class="eliminated-list" id="vote-eliminated-list"></div>
   <div class="player-vote-list" id="vote-list"></div>
   <div class="gap"></div>
-  <button class="btn" id="btn-vote" onclick="confirmVote()" disabled>Confirmar voto →</button>
+  <button class="btn" id="btn-vote" onclick="confirmVote()" aria-label="Confirmar el voto seleccionado" disabled>Confirmar voto →</button>
 </div>
 
 <!-- ELIMINATED -->
@@ -849,7 +852,7 @@
   <div class="elim-title" id="elim-title"></div>
   <p class="elim-sub"><span class="elim-name" id="elim-name"></span><span id="elim-msg"></span></p>
   <div class="gap"></div>
-  <button class="btn" id="btn-elim-next">Siguiente ronda →</button>
+  <button class="btn" id="btn-elim-next" aria-label="Pasar a la siguiente ronda">Siguiente ronda →</button>
 </div>
 
 <!-- IMPOSTOR WINS -->
@@ -876,7 +879,7 @@
     <p style="font-size:0.9rem;color:var(--text);margin-bottom:0.8rem" id="guess-label"></p>
     <div class="guess-section">
       <input type="text" id="guess-input" placeholder="¿Cuál crees que es?" aria-label="Introduce tu intento de adivinanza">
-      <button class="btn" onclick="checkGuess()">Adivinar</button>
+      <button class="btn" onclick="checkGuess()" aria-label="Intentar adivinar la palabra secreta">Adivinar</button>
     </div>
   </div>
   <div id="final-section" style="display:none;width:100%">
@@ -1328,6 +1331,16 @@ function loadMutePreference() {
 function gaEvent(name, params) {
   try { gtag('event', name, params || {}); } catch(e) {}
 }
+
+// ── SEGURIDAD ────────────────────────────────────────────────────
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 let allPlayers=[], activePlayers=[], gameMode=null;
 let gameWord='', gameHint='', impostorName='';
 let impostors=[], impostorCount=1, allImpostorsOriginal=[];
@@ -1379,8 +1392,8 @@ function renderCustomHistory() {
   list.innerHTML = customHistory.map((e, i) => `
     <div class="history-item" onclick="useHistoryItem(${i})">
       <div class="history-item-text">
-        <span class="history-item-word">${e.w}</span>
-        ${e.h ? `<span class="history-item-hint">Pista: ${e.h}</span>` : '<span class="history-item-hint" style="font-style:italic">Sin pista</span>'}
+        <span class="history-item-word">${escapeHtml(e.w)}</span>
+        ${e.h ? `<span class="history-item-hint">Pista: ${escapeHtml(e.h)}</span>` : '<span class="history-item-hint" style="font-style:italic">Sin pista</span>'}
       </div>
       <span class="history-item-use">Usar →</span>
     </div>`).join('');
@@ -1446,7 +1459,7 @@ function renderScores() {
   }
   el.innerHTML = statsHtml + sorted.map(([n,p],i) =>
     `<div class="score-item${i===0?' leader':''}">
-      <span class="score-name">${i===0?'👑 ':''}${n}</span>
+      <span class="score-name">${i===0?'👑 ':''}${escapeHtml(n)}</span>
       <span class="score-pts">${p} pts</span>
     </div>`
   ).join('');
@@ -1533,7 +1546,7 @@ function addPlayer() {
 function removePlayer(i) { allPlayers.splice(i,1); renderPlayerTags(); }
 function renderPlayerTags() {
   document.getElementById('player-tags').innerHTML = allPlayers.map((p,i) =>
-    `<span class="tag">${p}<span class="remove" onclick="removePlayer(${i})">×</span></span>`
+    `<span class="tag">${escapeHtml(p)}<span class="remove" onclick="removePlayer(${i})">×</span></span>`
   ).join('');
   const n = allPlayers.length;
   const ok = n >= 3;
@@ -2101,7 +2114,7 @@ function renderTurnOrderIn(elementId) {
     const medal = i < 3
       ? `<span class="turn-order-medal">${medals[i]}</span>`
       : `<span class="turn-order-num">${i+1}º</span>`;
-    return `<div class="turn-order-item">${medal}<span class="turn-order-name">${p}</span></div>`;
+    return `<div class="turn-order-item">${medal}<span class="turn-order-name">${escapeHtml(p)}</span></div>`;
   }).join('');
 }
 
@@ -2138,13 +2151,13 @@ function setupVote() {
     `${activePlayers.length} jugador${activePlayers.length!==1?'es':''} en juego`;
   const elimList = document.getElementById('vote-eliminated-list');
   if (eliminated.length > 0) {
-    elimList.innerHTML = eliminated.map(p => `<span class="eliminated-tag">❌ ${p}</span>`).join('');
+    elimList.innerHTML = eliminated.map(p => `<span class="eliminated-tag">❌ ${escapeHtml(p)}</span>`).join('');
     elimList.style.display = 'flex';
   } else {
     elimList.style.display = 'none';
   }
   document.getElementById('vote-list').innerHTML = activePlayers.map((p,i) =>
-    `<button class="vote-btn" onclick="selectVote(${i},this)">${p}</button>`
+    `<button class="vote-btn" onclick="selectVote(${i},this)">${escapeHtml(p)}</button>`
   ).join('');
   document.getElementById('btn-vote').disabled = true;
   voteSelected = null;
@@ -2350,6 +2363,27 @@ function goHome() {
   startTaglineRotation();
   goTo('screen-home');
 }
+
+function safeGoHome() {
+  const inGame = ['screen-reveal','screen-ready','screen-debate','screen-vote','screen-elim']
+    .some(id => document.getElementById(id).classList.contains('active'));
+  if (inGame && !confirm('¿Salir de la partida? Se perderá el progreso.')) return;
+  goHome();
+}
+
+// ── BOTÓN ATRÁS ANDROID ──────────────────────────────────────────
+window.addEventListener('popstate', () => {
+  const inGame = ['screen-reveal','screen-ready','screen-debate','screen-vote','screen-elim']
+    .some(id => document.getElementById(id).classList.contains('active'));
+  if (inGame) {
+    if (confirm('¿Salir de la partida? Se perderá el progreso.')) goHome();
+    else history.pushState(null, '', location.href);
+  } else {
+    goHome();
+  }
+});
+// Asegurar que hay un estado en el historial para capturar popstate
+history.pushState(null, '', location.href);
 
 // ── SERVICE WORKER ────────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
